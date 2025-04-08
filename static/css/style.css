@@ -95,3 +95,14 @@ select[multiple] {
     75% { transform: translateX(-5px); }
     100% { transform: translateX(0); }
 }
+
+/* Stile per il logo nella barra di navigazione */
+.navbar-nav .nav-link img {
+    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+    transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover img {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+}
