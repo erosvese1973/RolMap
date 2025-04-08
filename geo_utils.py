@@ -87,24 +87,40 @@ def get_geojson_from_wfs(comune_ids):
                 
                 logger.info(f"Normalized comune IDs: {normalized_comuni_ids}")
                 
+                # Raggruppa gli IDs per facilitare la ricerca evitando duplicati
+                # La chiave è il comune senza zeri iniziali, il valore è una lista di tutti i formati provati
+                comuni_groups = {}
+                for comune_id in normalized_comuni_ids:
+                    comune_orig = comune_id.lstrip('0')  # Versione senza zeri iniziali
+                    if comune_orig not in comuni_groups:
+                        comuni_groups[comune_orig] = []
+                    comuni_groups[comune_orig].append(comune_id)
+                
                 # Cerca le feature per ciascun comune richiesto
                 missing_comuni = []
                 found_comuni = set()  # Teniamo traccia dei comuni già trovati
                 
-                for comune_id in normalized_comuni_ids:
-                    # Verifichiamo se il comune è già stato trovato (evita doppioni)
-                    comune_orig = comune_id.lstrip('0')  # Versione senza zeri iniziali
-                    
+                # Per ogni gruppo di IDs dello stesso comune
+                for comune_orig, id_variants in comuni_groups.items():
+                    # Se questo comune è già stato trovato, continua
                     if comune_orig in found_comuni:
-                        continue  # Comune già trovato, salta
+                        continue
                     
-                    if comune_id in comuni_dict:
-                        features.append(comuni_dict[comune_id])
-                        found_comuni.add(comune_orig)  # Segna come trovato
-                    else:
-                        if comune_orig not in found_comuni:  # Se non è già stato trovato
-                            missing_comuni.append(comune_id)
-                            logger.warning(f"Comune ID {comune_id} not found in GeoJSON data")
+                    # Prova tutte le varianti di ID
+                    found = False
+                    for comune_id in id_variants:
+                        if comune_id in comuni_dict:
+                            features.append(comuni_dict[comune_id])
+                            found_comuni.add(comune_orig)  # Segna come trovato
+                            found = True
+                            break
+                    
+                    # Se nessuna variante è stata trovata, aggiungi una variante all'elenco dei mancanti
+                    if not found:
+                        # Prendi la prima variante come rappresentante per il fallback
+                        first_variant = id_variants[0]
+                        missing_comuni.append(first_variant)
+                        logger.warning(f"Comune ID not found in GeoJSON data: {first_variant} (tried variants: {id_variants})")
                 
                 # Se abbiamo comuni mancanti, genera poligoni per loro
                 if missing_comuni:
@@ -190,10 +206,23 @@ def _generate_fallback_geojson(comune_ids):
         coords.append(coords[0])
         return coords
     
-    # Generazione dei GeoJSON features per ogni comune
+    # Elimina duplicati: se abbiamo '13001' e '013001', teniamo solo una versione
+    unique_comuni = {}
     for comune_id in comune_ids:
+        comune_id_str = str(comune_id).strip()
+        stripped_id = comune_id_str.lstrip('0')  # Rimuovi gli zeri iniziali
+        
+        # Mantieni la versione con lo zero per coerenza con il GeoJSON
+        if stripped_id not in unique_comuni:
+            # Preferisci la versione con lo zero iniziale quando disponibile
+            if comune_id_str.startswith('0'):
+                unique_comuni[stripped_id] = comune_id_str
+            else:
+                unique_comuni[stripped_id] = comune_id_str
+    
+    # Generazione dei GeoJSON features per ogni comune
+    for comune_orig, comune_id_str in unique_comuni.items():
         # Normalizza l'ID
-        comune_id_str = str(comune_id)
         if len(comune_id_str) == 6 and comune_id_str.startswith('0'):
             normalized_id = comune_id_str
         elif comune_id_str.startswith('97'):
