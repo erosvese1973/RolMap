@@ -76,23 +76,35 @@ def get_geojson_from_wfs(comune_ids):
                             normalized_comuni_ids.append(f"0{comune_id_str}")
                         # Se inizia con 13, è probabilmente un comune della provincia di Como (013)
                         elif comune_id_str.startswith('13'):
+                            # Aggiungiamo sempre sia la versione con che senza lo zero
                             normalized_comuni_ids.append(comune_id_str)
-                            if len(comune_id_str) == 5:
-                                # Aggiungiamo anche il formato con lo zero davanti per sicurezza
-                                normalized_comuni_ids.append(f"0{comune_id_str}")
-                        # Tentiamo con la codifica del formato originale
-                        normalized_comuni_ids.append(comune_id_str)
+                            normalized_comuni_ids.append(f"0{comune_id_str}")
+                        # Per tutti gli altri formati
+                        else:
+                            # Proviamo sia il formato originale che con uno zero davanti
+                            normalized_comuni_ids.append(comune_id_str)
+                            normalized_comuni_ids.append(f"0{comune_id_str}")
                 
                 logger.info(f"Normalized comune IDs: {normalized_comuni_ids}")
                 
                 # Cerca le feature per ciascun comune richiesto
                 missing_comuni = []
+                found_comuni = set()  # Teniamo traccia dei comuni già trovati
+                
                 for comune_id in normalized_comuni_ids:
+                    # Verifichiamo se il comune è già stato trovato (evita doppioni)
+                    comune_orig = comune_id.lstrip('0')  # Versione senza zeri iniziali
+                    
+                    if comune_orig in found_comuni:
+                        continue  # Comune già trovato, salta
+                    
                     if comune_id in comuni_dict:
                         features.append(comuni_dict[comune_id])
+                        found_comuni.add(comune_orig)  # Segna come trovato
                     else:
-                        missing_comuni.append(comune_id)
-                        logger.warning(f"Comune ID {comune_id} not found in GeoJSON data")
+                        if comune_orig not in found_comuni:  # Se non è già stato trovato
+                            missing_comuni.append(comune_id)
+                            logger.warning(f"Comune ID {comune_id} not found in GeoJSON data")
                 
                 # Se abbiamo comuni mancanti, genera poligoni per loro
                 if missing_comuni:

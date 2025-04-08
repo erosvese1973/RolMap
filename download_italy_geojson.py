@@ -57,9 +57,12 @@ def download_comuni():
     # Creazione directory se non esiste
     ensure_output_dir()
     
-    # Tentiamo con diversi URL noti per i dati dei comuni italiani
+    # Tentiamo con diversi URL noti per i dati dei comuni italiani, partendo dai più recenti
     # Lista di URL da provare in ordine
     urls_to_try = [
+        f"{BASE_URL}limits_IT_municipalities_2024.geojson",
+        f"{BASE_URL}limits_IT_municipalities_2023.geojson",
+        f"{BASE_URL}limits_IT_municipalities_2022.geojson",
         f"{BASE_URL}limits_IT_municipalities.geojson",
         f"{BASE_URL}limits_IT_municipalities_2021.geojson", 
         f"{BASE_URL}limits_IT_municipalities_2020.geojson",
@@ -101,20 +104,29 @@ def download_province():
     # Creazione directory se non esiste
     ensure_output_dir()
     
-    # URL per le province italiane
-    province_url = f"{BASE_URL}/limits_IT_provinces_2023.geojson"
+    # URL per le province italiane, partendo dai più recenti
+    urls_to_try = [
+        f"{BASE_URL}limits_IT_provinces_2024.geojson",
+        f"{BASE_URL}limits_IT_provinces_2023.geojson",
+        f"{BASE_URL}limits_IT_provinces_2022.geojson",
+        f"{BASE_URL}limits_IT_provinces.geojson",
+        f"{BASE_URL}province.geojson",
+        "https://raw.githubusercontent.com/teamdigitale/confini-amministrativi-istat/master/geojson/province.geojson"
+    ]
+    
     province_path = OUTPUT_DIR / "province_italiane.geojson"
     
-    # Download del file
-    success = download_file(province_url, province_path)
-    if not success:
-        # Prova con l'anno precedente se quello corrente non è disponibile
-        logger.info("Impossibile scaricare i dati del 2023, provo con il 2022...")
-        province_url = f"{BASE_URL}/limits_IT_provinces_2022.geojson"
-        success = download_file(province_url, province_path)
+    # Proviamo ciascun URL fino a quando uno funziona
+    success = False
+    for url in urls_to_try:
+        logger.info(f"Tentativo con URL province: {url}")
+        success = download_file(url, province_path)
+        if success:
+            logger.info(f"Download province riuscito da {url}")
+            break
     
     if not success:
-        logger.error("Impossibile scaricare i dati delle province.")
+        logger.error("Impossibile scaricare i dati delle province da tutti gli URL disponibili.")
         return False
     
     return True
@@ -126,20 +138,29 @@ def download_regioni():
     # Creazione directory se non esiste
     ensure_output_dir()
     
-    # URL per le regioni italiane
-    regioni_url = f"{BASE_URL}/limits_IT_regions_2023.geojson"
+    # URL per le regioni italiane, partendo dai più recenti
+    urls_to_try = [
+        f"{BASE_URL}limits_IT_regions_2024.geojson",
+        f"{BASE_URL}limits_IT_regions_2023.geojson",
+        f"{BASE_URL}limits_IT_regions_2022.geojson",
+        f"{BASE_URL}limits_IT_regions.geojson",
+        f"{BASE_URL}regioni.geojson",
+        "https://raw.githubusercontent.com/teamdigitale/confini-amministrativi-istat/master/geojson/regioni.geojson"
+    ]
+    
     regioni_path = OUTPUT_DIR / "regioni_italiane.geojson"
     
-    # Download del file
-    success = download_file(regioni_url, regioni_path)
-    if not success:
-        # Prova con l'anno precedente se quello corrente non è disponibile
-        logger.info("Impossibile scaricare i dati del 2023, provo con il 2022...")
-        regioni_url = f"{BASE_URL}/limits_IT_regions_2022.geojson"
-        success = download_file(regioni_url, regioni_path)
+    # Proviamo ciascun URL fino a quando uno funziona
+    success = False
+    for url in urls_to_try:
+        logger.info(f"Tentativo con URL regioni: {url}")
+        success = download_file(url, regioni_path)
+        if success:
+            logger.info(f"Download regioni riuscito da {url}")
+            break
     
     if not success:
-        logger.error("Impossibile scaricare i dati delle regioni.")
+        logger.error("Impossibile scaricare i dati delle regioni da tutti gli URL disponibili.")
         return False
     
     return True
