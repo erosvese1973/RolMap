@@ -7,6 +7,10 @@
         height: 500px;
         width: 100%;
         border-radius: 5px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        background-color: #f5f5f5;
     }
     .map-container {
         position: relative;
@@ -110,11 +114,52 @@ function initMap() {
 }
 
 function fetchGeoJSON() {
-    // Show loading indicator
-    const mapElement = document.getElementById('map');
-    mapElement.innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Caricamento dati geografici...</p></div>';
+    console.log("Fetching GeoJSON data for comuni:", comune_ids);
     
-    // Fetch GeoJSON data from the server
+    // Create a simple polygon for testing
+    const simpleData = {
+        "type": "FeatureCollection",
+        "features": [
+            {
+                "type": "Feature",
+                "properties": {
+                    "id": "test",
+                    "name": "Test Comune"
+                },
+                "geometry": {
+                    "type": "Polygon",
+                    "coordinates": [
+                        [
+                            [12.4, 41.8],
+                            [12.6, 41.8],
+                            [12.6, 42.0],
+                            [12.4, 42.0],
+                            [12.4, 41.8]
+                        ]
+                    ]
+                }
+            }
+        ]
+    };
+    
+    // Add the test GeoJSON to the map
+    map.data.addGeoJson(simpleData);
+    
+    // Style the features
+    map.data.setStyle({
+        fillColor: '#FF9800',
+        fillOpacity: 0.5,
+        strokeColor: '#FF5722',
+        strokeWeight: 2
+    });
+    
+    // Center the map on the test polygon
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(new google.maps.LatLng(41.8, 12.4));
+    bounds.extend(new google.maps.LatLng(42.0, 12.6));
+    map.fitBounds(bounds);
+    
+    // Also try to fetch real data from the server
     fetch('{{ url_for("get_geojson") }}', {
         method: 'POST',
         headers: {
@@ -124,8 +169,7 @@ function fetchGeoJSON() {
     })
     .then(response => response.json())
     .then(geojson => {
-        // Clear loading indicator
-        mapElement.innerHTML = '';
+        console.log("Server response:", geojson);
         
         // Add the GeoJSON data to the map
         map.data.addGeoJson(geojson);
