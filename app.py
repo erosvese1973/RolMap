@@ -249,8 +249,23 @@ def get_geojson():
         return jsonify({'error': 'No municipalities selected'})
     
     try:
-        # This would call an actual GeoServer, but we'll simulate the response for now
+        # Prima di ottenere il GeoJSON, otteniamo i nomi reali dei comuni per i popup
+        comuni_names = {}
+        for comune_id in comune_ids:
+            comune_row = comuni_data[comuni_data['codice'] == comune_id]
+            if not comune_row.empty:
+                comuni_names[comune_id] = comune_row.iloc[0]['comune']
+        
+        # Richiamiamo il servizio WFS per ottenere i poligoni
         geojson = get_geojson_from_wfs(comune_ids)
+        
+        # Arricchiamo il GeoJSON con i nomi reali dei comuni
+        for feature in geojson['features']:
+            if 'properties' in feature and 'id' in feature['properties']:
+                comune_id = feature['properties']['id']
+                if comune_id in comuni_names:
+                    feature['properties']['name'] = comuni_names[comune_id]
+        
         return jsonify(geojson)
     except Exception as e:
         logger.error(f"Error fetching GeoJSON: {str(e)}")

@@ -100,61 +100,42 @@ let map;
 
 // Initialize the map when the page loads
 document.addEventListener('DOMContentLoaded', function() {
-    // Create the Leaflet map centered on Italy
-    map = L.map('map').setView([41.9, 12.5], 6);
+    // Impostare la vista iniziale sulla provincia di Lecco
+    map = L.map('map').setView([45.85, 9.38], 10);
     
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
     
-    // Add a marker for each comune in the list
-    const markers = [];
-    {% for comune in comuni %}
-        // Create marker for comune
-        const marker = L.marker([
-            // These are dummy coordinates since we don't have real ones
-            // In a real app, you would store lat/lng in your DB
-            41.9 + (Math.random() * 0.5 - 0.25), 
-            12.5 + (Math.random() * 0.5 - 0.25)
-        ]).addTo(map);
-        
-        // Add popup with comune info
-        marker.bindPopup(`
-            <div>
-                <h6>{{ comune.name }}</h6>
-                <p>Provincia: {{ comune.province }}</p>
-                <p>Regione: {{ comune.region }}</p>
-                <p>Agente: {{ agent_name }}</p>
+    // Creazione del pulsante di controllo per la legenda
+    const legendControl = L.control({position: 'bottomright'});
+    legendControl.onAdd = function() {
+        const div = L.DomUtil.create('div', 'info legend');
+        div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
+        div.style.borderRadius = '5px';
+        div.style.border = '1px solid #ccc';
+        div.innerHTML = `
+            <h6 style="margin-top: 0;">Legenda</h6>
+            <div style="display: flex; align-items: center; margin-bottom: 5px;">
+                <div style="width: 20px; height: 20px; background-color: #FF9800; opacity: 0.5; border: 2px solid #FF5722;"></div>
+                <span style="margin-left: 5px;">Comuni assegnati</span>
             </div>
-        `);
-        
-        markers.push(marker);
-    {% endfor %}
+            <div style="font-size: 0.9em; margin-top: 5px;">
+                <strong>Agente:</strong> ${agent_name}<br>
+                <strong>Comuni:</strong> ${comune_ids.length}
+            </div>
+        `;
+        return div;
+    };
+    legendControl.addTo(map);
     
-    // If we have markers, create a group and fit the map to its bounds
-    if (markers.length > 0) {
-        const group = L.featureGroup(markers);
-        map.fitBounds(group.getBounds(), {padding: [50, 50]});
-    }
+    // Disabilitiamo temporaneamente i marker per le singole località, 
+    // dato che ora visualizziamo i poligoni dei comuni.
+    // Li genereremo dai dati reali che arrivano dal server.
     
-    // Create a polygon representing a territory
-    // This is a sample polygon centered around Rome
-    const polygon = L.polygon([
-        [41.8, 12.4],
-        [41.8, 12.6],
-        [42.0, 12.6],
-        [42.0, 12.4]
-    ], {
-        color: '#FF5722',
-        fillColor: '#FF9800',
-        fillOpacity: 0.5,
-        weight: 2
-    }).addTo(map);
-    
-    polygon.bindPopup("<b>Area di esempio</b><br>Territorio dell'agente");
-    
-    // Fetch additional GeoJSON data from the server
+    // Fetch GeoJSON data from the server per mostrare i confini reali dei comuni
     fetchGeoJSON();
 });
 
