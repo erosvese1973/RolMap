@@ -1,0 +1,270 @@
+{% extends 'layout.html' %}
+
+{% block head %}
+<title>Gestione Territori - Selezione Comune</title>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    Assegnazione Territori agli Agenti
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="selectionForm" action="{{ url_for('submit') }}" method="post">
+                    <!-- Nome Agente -->
+                    <div class="mb-4">
+                        <label for="agent_name" class="form-label">Nome Agente</label>
+                        <input type="text" class="form-control" id="agent_name" name="agent_name" required>
+                        <div class="form-text">Inserisci il nome dell'agente a cui assegnare i territori</div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <!-- Regione -->
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label for="region" class="form-label">Regione</label>
+                            <select class="form-select" id="region" name="region" required>
+                                <option value="" selected>Seleziona una regione</option>
+                                {% for region in regions %}
+                                <option value="{{ region }}">{{ region }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Provincia -->
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label for="province" class="form-label">Provincia</label>
+                            <select class="form-select" id="province" name="province" disabled>
+                                <option value="">Seleziona prima una regione</option>
+                            </select>
+                        </div>
+
+                        <!-- Comuni -->
+                        <div class="col-md-4">
+                            <label for="comuni" class="form-label">Comuni</label>
+                            <select class="form-select" id="comuni" name="comuni" multiple size="5" disabled>
+                                <option value="">Seleziona prima una provincia</option>
+                            </select>
+                            <div class="form-text">Tieni premuto CTRL per selezionare più comuni</div>
+                        </div>
+                    </div>
+
+                    <!-- Selected Comuni List -->
+                    <div class="mb-4">
+                        <label class="form-label">Comuni Selezionati</label>
+                        <div id="selectedComuniContainer" class="border rounded p-3 min-height-100">
+                            <p id="noComuniMessage" class="text-muted">Nessun comune selezionato</p>
+                            <div id="selectedComuni" class="d-flex flex-wrap gap-2">
+                                <!-- Selected comuni will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="button" id="resetBtn" class="btn btn-secondary">
+                            <i class="fas fa-undo me-1"></i>
+                            Reset
+                        </button>
+                        <button type="submit" id="submitBtn" class="btn btn-primary" disabled>
+                            <i class="fas fa-map me-1"></i>
+                            Visualizza Mappa
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const regionSelect = document.getElementById('region');
+    const provinceSelect = document.getElementById('province');
+    const comuniSelect = document.getElementById('comuni');
+    const selectedComuniContainer = document.getElementById('selectedComuni');
+    const noComuniMessage = document.getElementById('noComuniMessage');
+    const submitBtn = document.getElementById('submitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const selectionForm = document.getElementById('selectionForm');
+    
+    // Selected comuni storage
+    const selectedComuniMap = new Map();
+    
+    // Update provinces when region changes
+    regionSelect.addEventListener('change', function() {
+        provinceSelect.innerHTML = '<option value="">Caricamento...</option>';
+        provinceSelect.disabled = true;
+        comuniSelect.innerHTML = '<option value="">Seleziona prima una provincia</option>';
+        comuniSelect.disabled = true;
+        
+        if (!this.value) {
+            provinceSelect.innerHTML = '<option value="">Seleziona prima una regione</option>';
+            return;
+        }
+        
+        // Fetch provinces for selected region
+        fetch('{{ url_for("get_provinces") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'region=' + encodeURIComponent(this.value)
+        })
+        .then(response => response.json())
+        .then(provinces => {
+            provinceSelect.innerHTML = '<option value="">Seleziona una provincia</option>';
+            provinces.forEach(province => {
+                const option = document.createElement('option');
+                option.value = province;
+                option.textContent = province;
+                provinceSelect.appendChild(option);
+            });
+            provinceSelect.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error fetching provinces:', error);
+            provinceSelect.innerHTML = '<option value="">Errore nel caricamento</option>';
+        });
+    });
+    
+    // Update comuni when province changes
+    provinceSelect.addEventListener('change', function() {
+        comuniSelect.innerHTML = '<option value="">Caricamento...</option>';
+        comuniSelect.disabled = true;
+        
+        if (!this.value) {
+            comuniSelect.innerHTML = '<option value="">Seleziona prima una provincia</option>';
+            return;
+        }
+        
+        // Fetch comuni for selected province
+        fetch('{{ url_for("get_comuni") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'province=' + encodeURIComponent(this.value)
+        })
+        .then(response => response.json())
+        .then(comuni => {
+            comuniSelect.innerHTML = '';
+            comuni.forEach(comune => {
+                const option = document.createElement('option');
+                option.value = comune.codice;
+                option.textContent = comune.comune;
+                // If this comune is already selected, mark it as selected
+                if (selectedComuniMap.has(comune.codice)) {
+                    option.selected = true;
+                }
+                comuniSelect.appendChild(option);
+            });
+            comuniSelect.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error fetching comuni:', error);
+            comuniSelect.innerHTML = '<option value="">Errore nel caricamento</option>';
+        });
+    });
+    
+    // Handle comune selection
+    comuniSelect.addEventListener('change', function() {
+        // Clear previously selected comuni from this province
+        Array.from(this.options).forEach(option => {
+            if (!option.selected && selectedComuniMap.has(option.value)) {
+                selectedComuniMap.delete(option.value);
+            }
+        });
+        
+        // Add newly selected comuni
+        Array.from(this.selectedOptions).forEach(option => {
+            if (!selectedComuniMap.has(option.value)) {
+                selectedComuniMap.set(option.value, {
+                    id: option.value,
+                    name: option.textContent,
+                    province: provinceSelect.value,
+                    region: regionSelect.value
+                });
+            }
+        });
+        
+        // Update the display of selected comuni
+        updateSelectedComuniDisplay();
+    });
+    
+    // Function to update the display of selected comuni
+    function updateSelectedComuniDisplay() {
+        // Clear current display
+        selectedComuniContainer.innerHTML = '';
+        
+        if (selectedComuniMap.size === 0) {
+            noComuniMessage.style.display = 'block';
+            submitBtn.disabled = true;
+        } else {
+            noComuniMessage.style.display = 'none';
+            submitBtn.disabled = false;
+            
+            // Add each selected comune as a badge
+            selectedComuniMap.forEach(comune => {
+                const badge = document.createElement('div');
+                badge.className = 'badge bg-primary d-flex align-items-center p-2 me-2 mb-2';
+                badge.innerHTML = `
+                    <span>${comune.name} (${comune.province}, ${comune.region})</span>
+                    <button type="button" class="btn-close btn-close-white ms-2" 
+                            aria-label="Remove" data-id="${comune.id}"></button>
+                `;
+                selectedComuniContainer.appendChild(badge);
+                
+                // Add hidden input for form submission
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'comuni';
+                hiddenInput.value = comune.id;
+                selectedComuniContainer.appendChild(hiddenInput);
+            });
+            
+            // Add event listeners to remove buttons
+            document.querySelectorAll('#selectedComuni .btn-close').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const comuneId = this.dataset.id;
+                    selectedComuniMap.delete(comuneId);
+                    updateSelectedComuniDisplay();
+                    
+                    // Update selection in the select element if visible
+                    if (!comuniSelect.disabled) {
+                        Array.from(comuniSelect.options).forEach(option => {
+                            if (option.value === comuneId) {
+                                option.selected = false;
+                            }
+                        });
+                    }
+                });
+            });
+        }
+    }
+    
+    // Reset button handler
+    resetBtn.addEventListener('click', function() {
+        selectedComuniMap.clear();
+        updateSelectedComuniDisplay();
+        
+        // Reset form fields
+        regionSelect.value = '';
+        provinceSelect.innerHTML = '<option value="">Seleziona prima una regione</option>';
+        provinceSelect.disabled = true;
+        comuniSelect.innerHTML = '<option value="">Seleziona prima una provincia</option>';
+        comuniSelect.disabled = true;
+        
+        document.getElementById('agent_name').value = '';
+    });
+    
+    // Initialize display
+    updateSelectedComuniDisplay();
+});
+</script>
+{% endblock %}

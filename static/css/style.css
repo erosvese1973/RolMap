@@ -1,0 +1,61 @@
+/* Custom CSS styles */
+
+/* Minimum height for the selected comuni container */
+.min-height-100 {
+    min-height: 100px;
+}
+
+/* Custom map styles */
+#map {
+    border: 1px solid var(--bs-border-color);
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.9rem;
+}
+
+/* Sticky footer */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Color customizations */
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--bs-primary-dark);
+    border-color: var(--bs-primary-dark);
+}
+
+/* Map styling */
+.map-overlay {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Multi-select styling */
+select[multiple] {
+    height: 200px;
+}
+
+/* Animation for loading */
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
