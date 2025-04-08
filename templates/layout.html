@@ -31,13 +31,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'assegnazione' %}active{% endif %}" href="{{ url_for('assegnazione') }}">
-                            <i class="fas fa-map-pin me-1"></i> Assegnazione Territori
+                        <a class="nav-link {% if request.endpoint == 'list_agents' %}active{% endif %}" href="{{ url_for('list_agents') }}">
+                            <i class="fas fa-users me-1"></i> Elenco Agenti
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'list_agents' %}active{% endif %}" href="{{ url_for('list_agents') }}">
-                            <i class="fas fa-users me-1"></i> Elenco Agenti
+                        <a class="nav-link {% if request.endpoint == 'assegnazione' %}active{% endif %}" href="{{ url_for('assegnazione') }}">
+                            <i class="fas fa-map-pin me-1"></i> Assegnazione Territori
                         </a>
                     </li>
 
