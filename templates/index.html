@@ -65,7 +65,11 @@
                             <select class="form-select" id="comuni" name="comuni" multiple size="5" disabled>
                                 <option value="">Seleziona prima una provincia</option>
                             </select>
-                            <div class="form-text">Tieni premuto CTRL per selezionare più comuni</div>
+                            <div class="form-text">
+                                <small class="text-muted">Tieni premuto CTRL per selezionare più comuni</small>
+                                <br>
+                                <small class="text-warning">Nota: I comuni già assegnati ad altri agenti non possono essere riassegnati</small>
+                            </div>
                         </div>
                     </div>
 
@@ -241,10 +245,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 const option = document.createElement('option');
                 option.value = comune.codice;
                 option.textContent = comune.comune;
+                
+                // If already assigned to another agent, disable and mark with a warning
+                if (comune.assigned && !selectedComuniMap.has(comune.codice)) {
+                    option.disabled = true;
+                    option.className = 'text-warning';
+                    option.textContent += ' (Già assegnato)';
+                }
+                
                 // If this comune is already selected, mark it as selected
                 if (selectedComuniMap.has(comune.codice)) {
                     option.selected = true;
                 }
+                
                 comuniSelect.appendChild(option);
             });
             comuniSelect.disabled = false;

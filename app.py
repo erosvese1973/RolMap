@@ -77,8 +77,24 @@ def get_comuni():
     if not province:
         return jsonify([])
     
-    comuni = comuni_data[comuni_data['provincia'] == province][['codice', 'comune']].to_dict('records')
-    return jsonify(comuni)
+    # Get all comuni for this province
+    province_comuni = comuni_data[comuni_data['provincia'] == province][['codice', 'comune']].to_dict('records')
+    
+    # Get list of all assigned comuni
+    assigned_comuni = []
+    try:
+        assigned_comuni = [a.comune_id for a in models.Assignment.query.all()]
+    except Exception as e:
+        logger.error(f"Error getting assigned comuni: {str(e)}")
+    
+    # Mark comuni that are already assigned to other agents
+    for comune in province_comuni:
+        if comune['codice'] in assigned_comuni:
+            comune['assigned'] = True
+        else:
+            comune['assigned'] = False
+    
+    return jsonify(province_comuni)
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -113,7 +129,10 @@ def submit():
                     existing_assignment = models.Assignment.query.filter_by(comune_id=comune_id).first()
                     if existing_assignment and existing_assignment.agent_id != existing_agent.id:
                         comune_name = comune_data.iloc[0]['comune']
-                        flash(f'Il comune {comune_name} è già assegnato a un altro agente', 'warning')
+                        # Get the agent name who has this comune
+                        other_agent = models.Agent.query.get(existing_assignment.agent_id)
+                        other_agent_name = other_agent.name if other_agent else "un altro agente"
+                        flash(f'Il comune {comune_name} è già assegnato a {other_agent_name}. Riassegnazione non possibile.', 'warning')
                         continue
                     
                     new_assignment = models.Assignment(
@@ -144,7 +163,10 @@ def submit():
                 existing_assignment = models.Assignment.query.filter_by(comune_id=comune_id).first()
                 if existing_assignment:
                     comune_name = comune_data.iloc[0]['comune']
-                    flash(f'Il comune {comune_name} è già assegnato a un altro agente', 'warning')
+                    # Get the agent name who has this comune
+                    other_agent = models.Agent.query.get(existing_assignment.agent_id)
+                    other_agent_name = other_agent.name if other_agent else "un altro agente"
+                    flash(f'Il comune {comune_name} è già assegnato a {other_agent_name}. Riassegnazione non possibile.', 'warning')
                     continue
                 
                 new_assignment = models.Assignment(
