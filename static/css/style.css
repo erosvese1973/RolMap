@@ -98,11 +98,17 @@ select[multiple] {
 
 /* Stile per il logo nella barra di navigazione */
 .navbar-nav .nav-link img {
-    filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.8)) 
+            drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
     transition: transform 0.3s ease, filter 0.3s ease;
+    border: 2px solid white;
+    border-radius: 5px;
+    padding: 3px;
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 .navbar-nav .nav-link:hover img {
     transform: scale(1.05);
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 1)) 
+            drop-shadow(0 0 12px rgba(255, 255, 255, 0.8));
 }
