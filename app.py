@@ -2,6 +2,7 @@ import os
 import logging
 import time
 from datetime import datetime
+from collections import OrderedDict
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
@@ -366,8 +367,12 @@ def get_geojson():
             if not found:
                 logger.warning(f"Comune ID not found in dataset: {comune_id_str} (tried variants: {variants})")
         
+        # Eliminiamo i duplicati per evitare problemi di visualizzazione
+        unique_comune_ids = list(OrderedDict.fromkeys(comune_ids))
+        logger.info(f"Removed duplicates: {len(comune_ids)} -> {len(unique_comune_ids)} unique IDs")
+        
         # Richiamiamo il servizio WFS per ottenere i poligoni
-        geojson = get_geojson_from_wfs(comune_ids)
+        geojson = get_geojson_from_wfs(unique_comune_ids)
         
         # Verifichiamo che il GeoJSON sia valido e contenga features
         if not geojson or 'features' not in geojson or not isinstance(geojson['features'], list):

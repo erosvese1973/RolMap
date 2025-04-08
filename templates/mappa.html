@@ -88,17 +88,7 @@
                     </div>
                 </div>
                 
-                <!-- Area debug per poligoni non trovati -->
-                <div id="debug-fallback-polygons" class="mt-3 p-2 border border-warning rounded bg-warning bg-opacity-10" style="display: none;">
-                    <h6 class="text-warning mb-2">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Avviso: Poligoni non trovati
-                    </h6>
-                    <p class="small text-muted mb-1">Per i seguenti comuni non sono stati trovati i confini esatti e sono stati generati dei poligoni approssimativi:</p>
-                    <div id="fallback-polygon-list" class="ps-3 small">
-                        <!-- La lista dei comuni con poligoni di fallback sarà inserita qui -->
-                    </div>
-                </div>
+                <!-- Area debug rimossa -->
             </div>
         </div>
     </div>
@@ -201,16 +191,8 @@ document.addEventListener('DOMContentLoaded', function() {
 function fetchGeoJSON() {
     console.log("Fetching GeoJSON data for comuni:", comune_ids);
     
-    // Debug: Visualizziamo i dati di input
-    const debugElement = document.createElement('div');
-    debugElement.style.position = 'absolute';
-    debugElement.style.top = '10px';
-    debugElement.style.right = '10px';
-    debugElement.style.zIndex = '9999';
-    debugElement.style.backgroundColor = 'white';
-    debugElement.style.padding = '5px';
-    debugElement.textContent = `Debug: ${comune_ids.length} comuni`;
-    document.getElementById('map').appendChild(debugElement);
+    // Ora non visualizziamo più il debug element
+    // Usiamo solo la console per eventuali debug
     
     // Creiamo un formato di invio corretto per l'API
     // Notiamo che l'array comune_ids potrebbe avere prefissi "0" mancanti
@@ -331,15 +313,7 @@ function fetchGeoJSON() {
                                 <p>Agente: {{ agent_name }}</p>
                             `;
                             
-                        // Aggiungi un avviso se è un poligono di fallback
-                        if (isFallback) {
-                            popupContent += `
-                                <p class="text-warning" style="font-size: 0.8em; margin-top: 5px;">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    Confini approssimativi (dati non disponibili)
-                                </p>
-                            `;
-                        }
+                        // Non mostriamo più l'avviso per i poligoni di fallback
                         
                         popupContent += `</div>`;
                         
