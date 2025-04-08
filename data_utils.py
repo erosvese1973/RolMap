@@ -112,12 +112,19 @@ def load_comuni_data():
     Returns a pandas DataFrame with the data.
     """
     try:
-        # Try to load from the complete list first
+        # Try to load from the ISTAT list first (complete, ufficiale)
+        csv_path_istat = os.path.join('static', 'data', 'elenco_comuni_istat.csv')
+        # Try to load from the complete list next
         csv_path_completo = os.path.join('static', 'data', 'elenco_comuni_completo.csv')
+        # Base list as last resort
         csv_path_base = os.path.join('static', 'data', 'elenco_comuni.csv')
         
+        # Check if the ISTAT file exists (preferito)
+        if os.path.exists(csv_path_istat):
+            logger.info(f"Loading comuni data from {csv_path_istat}")
+            df = pd.read_csv(csv_path_istat)
         # Check if the complete file exists
-        if os.path.exists(csv_path_completo):
+        elif os.path.exists(csv_path_completo):
             logger.info(f"Loading comuni data from {csv_path_completo}")
             df = pd.read_csv(csv_path_completo)
         # Otherwise check if the base file exists
