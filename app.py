@@ -246,7 +246,10 @@ def get_geojson():
     comune_ids = request.json.get('comune_ids', [])
     
     if not comune_ids:
-        return jsonify({'error': 'No municipalities selected'})
+        logger.warning("No municipality IDs received in /get_geojson request")
+        return jsonify({'error': 'No municipalities selected', 'type': 'FeatureCollection', 'features': []})
+    
+    logger.info(f"Processing GeoJSON request for {len(comune_ids)} municipalities: {comune_ids}")
     
     try:
         # Prima di ottenere il GeoJSON, otteniamo i nomi reali dei comuni per i popup
@@ -255,21 +258,39 @@ def get_geojson():
             comune_row = comuni_data[comuni_data['codice'] == comune_id]
             if not comune_row.empty:
                 comuni_names[comune_id] = comune_row.iloc[0]['comune']
+                logger.debug(f"Found name for comune {comune_id}: {comuni_names[comune_id]}")
+            else:
+                logger.warning(f"Comune ID not found in dataset: {comune_id}")
         
         # Richiamiamo il servizio WFS per ottenere i poligoni
         geojson = get_geojson_from_wfs(comune_ids)
         
+        # Verifichiamo che il GeoJSON sia valido e contenga features
+        if not geojson or 'features' not in geojson or not isinstance(geojson['features'], list):
+            logger.error(f"Invalid GeoJSON structure received from WFS service")
+            return jsonify({'error': 'Invalid GeoJSON structure', 'type': 'FeatureCollection', 'features': []})
+            
         # Arricchiamo il GeoJSON con i nomi reali dei comuni
         for feature in geojson['features']:
             if 'properties' in feature and 'id' in feature['properties']:
                 comune_id = feature['properties']['id']
                 if comune_id in comuni_names:
                     feature['properties']['name'] = comuni_names[comune_id]
+                else:
+                    # Se non troviamo il nome, manteniamo almeno l'ID come identificativo
+                    feature['properties']['name'] = f"Comune {comune_id}"
         
+        logger.info(f"Returning GeoJSON with {len(geojson['features'])} features")
         return jsonify(geojson)
     except Exception as e:
         logger.error(f"Error fetching GeoJSON: {str(e)}")
-        return jsonify({'error': str(e)})
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({
+            'error': str(e), 
+            'type': 'FeatureCollection', 
+            'features': []
+        })
 
 @app.route('/agents')
 def list_agents():

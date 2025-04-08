@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span style="margin-left: 5px;">Comuni assegnati</span>
             </div>
             <div style="font-size: 0.9em; margin-top: 5px;">
-                <strong>Agente:</strong> ${agent_name}<br>
+                <strong>Agente:</strong> {{ agent_name }}<br>
                 <strong>Comuni:</strong> ${comune_ids.length}
             </div>
         `;
@@ -142,6 +142,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function fetchGeoJSON() {
     console.log("Fetching GeoJSON data for comuni:", comune_ids);
     
+    // Debug: Visualizziamo i dati di input
+    document.getElementById('map').innerHTML += `<div style="position:absolute; top:10px; right:10px; z-index:9999; background-color:white; padding:5px;">Debug: ${comune_ids.length} comuni</div>`;
+    
     // Fetch GeoJSON data from the server
     fetch('{{ url_for("get_geojson") }}', {
         method: 'POST',
@@ -150,41 +153,79 @@ function fetchGeoJSON() {
         },
         body: JSON.stringify({ comune_ids: comune_ids })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(geojson => {
-        console.log("Server response:", geojson);
+        console.log("Server response received:", geojson);
+        
+        // Verifica che geojson abbia le features
+        if (!geojson || !geojson.features || geojson.features.length === 0) {
+            console.error("GeoJSON response does not contain features:", geojson);
+            document.getElementById('map').innerHTML += `
+                <div style="position:absolute; top:40px; right:10px; z-index:9999; background-color:white; padding:5px; color:red;">
+                    Errore: Nessun dato GeoJSON valido ricevuto
+                </div>`;
+            return;
+        }
+        
+        console.log(`Received ${geojson.features.length} features in GeoJSON response`);
         
         // Add the GeoJSON data to the map
-        const geoJsonLayer = L.geoJSON(geojson, {
-            style: {
-                color: '#FF5722',
-                fillColor: '#FF9800',
-                fillOpacity: 0.5,
-                weight: 2
-            },
-            onEachFeature: function(feature, layer) {
-                // Add popup with feature info
-                const props = feature.properties;
-                const id = props ? props.id : 'Unknown';
-                const name = props ? props.name : 'Unknown Municipality';
-                
-                layer.bindPopup(`
-                    <div>
-                        <h6>${name}</h6>
-                        <p>Codice: ${id}</p>
-                        <p>Agente: {{ agent_name }}</p>
-                    </div>
-                `);
+        try {
+            const geoJsonLayer = L.geoJSON(geojson, {
+                style: function(feature) {
+                    return {
+                        color: '#FF5722',
+                        fillColor: '#FF9800',
+                        fillOpacity: 0.7,
+                        weight: 3,
+                        opacity: 1
+                    };
+                },
+                onEachFeature: function(feature, layer) {
+                    // Add popup with feature info
+                    if (feature && feature.properties) {
+                        const props = feature.properties;
+                        const id = props.id || 'Unknown';
+                        const name = props.name || `Comune ${id}`;
+                        
+                        layer.bindPopup(`
+                            <div>
+                                <h6>${name}</h6>
+                                <p>Codice: ${id}</p>
+                                <p>Agente: {{ agent_name }}</p>
+                            </div>
+                        `);
+                    }
+                }
+            });
+            
+            // Aggiungiamo il layer alla mappa
+            geoJsonLayer.addTo(map);
+            
+            // Fit map to GeoJSON boundaries
+            if (geojson.features && geojson.features.length > 0) {
+                map.fitBounds(geoJsonLayer.getBounds(), { padding: [30, 30] });
+                console.log("Map bounds adjusted to fit GeoJSON layer");
             }
-        }).addTo(map);
-        
-        // Fit map to GeoJSON boundaries
-        if (geojson.features && geojson.features.length > 0) {
-            map.fitBounds(geoJsonLayer.getBounds());
+        } catch (err) {
+            console.error("Error rendering GeoJSON:", err);
+            document.getElementById('map').innerHTML += `
+                <div style="position:absolute; top:70px; right:10px; z-index:9999; background-color:white; padding:5px; color:red;">
+                    Errore durante il rendering: ${err.message}
+                </div>`;
         }
     })
     .catch(error => {
-        console.error('Error fetching GeoJSON:', error);
+        console.error('Error fetching or processing GeoJSON:', error);
+        document.getElementById('map').innerHTML += `
+            <div style="position:absolute; top:100px; right:10px; z-index:9999; background-color:white; padding:5px; color:red;">
+                Errore di connessione: ${error.message}
+            </div>`;
     });
 }
 </script>
