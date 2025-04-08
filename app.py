@@ -149,6 +149,8 @@ def submit():
     try:
         agent_name = request.form.get('agent_name')
         agent_color = request.form.get('agent_color', '#ff9800')  # Default to orange if not provided
+        agent_phone = request.form.get('agent_phone', '')  # Numero di cellulare (opzionale)
+        agent_email = request.form.get('agent_email', '')  # Email (opzionale)
         comune_ids = request.form.getlist('comuni')
         agent_id = request.form.get('agent_id')  # Ottieni l'ID dell'agente dalla richiesta
         
@@ -214,9 +216,11 @@ def submit():
                 return redirect(url_for('assegnazione'))
         
         if existing_agent:
-            # Update existing agent's municipalities and color
+            # Update existing agent's municipalities, color, phone, and email
             existing_agent.registration_date = datetime.now()
             existing_agent.color = agent_color  # Update color
+            existing_agent.phone = agent_phone  # Update phone number
+            existing_agent.email = agent_email  # Update email
             
             # Get existing comune assignments for this agent
             # Ensure we're using fresh data
@@ -251,6 +255,8 @@ def submit():
             # Create new agent with color
             new_agent = models.Agent(
                 name=agent_name,
+                phone=agent_phone,
+                email=agent_email,
                 registration_date=datetime.now(),
                 color=agent_color
             )
@@ -467,6 +473,8 @@ def list_agents():
         agent_data.append({
             'id': agent.id,
             'name': agent.name,
+            'phone': agent.phone,
+            'email': agent.email,
             'registration_date': agent.registration_date,
             'color': agent.color,
             'comuni': comuni
@@ -528,6 +536,8 @@ def mappa_completa():
         agent_data.append({
             'id': agent.id,
             'name': agent.name,
+            'phone': agent.phone,
+            'email': agent.email,
             'color': agent_color,
             'comuni': agent_comuni,
             'count': len(agent_comuni)

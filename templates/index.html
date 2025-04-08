@@ -29,7 +29,9 @@
                                 <option value="" selected>-- Seleziona un agente --</option>
                                 {% for agent in agents %}
                                 <option value="{{ agent.id }}" {% if edit_agent and edit_agent.id == agent.id %}selected{% endif %}
-                                        data-color="{{ agent.color }}">
+                                        data-color="{{ agent.color }}"
+                                        data-phone="{{ agent.phone or '' }}"
+                                        data-email="{{ agent.email or '' }}">
                                     {{ agent.name }}
                                 </option>
                                 {% endfor %}
@@ -46,11 +48,27 @@
                     </div>
                     
                     <div class="row mb-4">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="agent_color" class="form-label">Colore Agente</label>
                             <input type="color" class="form-control form-control-color" id="agent_color" name="agent_color" 
                                    {% if edit_agent %}value="{{ edit_agent.color }}"{% else %}value="#ff9800"{% endif %}>
                             <div class="form-text">Colore per identificare i territori dell'agente sulla mappa</div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="agent_phone" class="form-label">Cellulare</label>
+                            <input type="tel" class="form-control" id="agent_phone" name="agent_phone" 
+                                   {% if edit_agent and edit_agent.phone %}value="{{ edit_agent.phone }}"{% endif %} 
+                                   placeholder="Es. +39 333 1234567">
+                            <div class="form-text">Numero di cellulare dell'agente (opzionale)</div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label for="agent_email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="agent_email" name="agent_email" 
+                                   {% if edit_agent and edit_agent.email %}value="{{ edit_agent.email }}"{% endif %} 
+                                   placeholder="email@esempio.com">
+                            <div class="form-text">Indirizzo email dell'agente (opzionale)</div>
                         </div>
                     </div>
 
@@ -128,6 +146,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const agentSelect = document.getElementById('agentSelect');
     const agentNameInput = document.getElementById('agent_name');
     const agentColorInput = document.getElementById('agent_color');
+    const agentPhoneInput = document.getElementById('agent_phone');
+    const agentEmailInput = document.getElementById('agent_email');
     const regionSelect = document.getElementById('region');
     const provinceSelect = document.getElementById('province');
     const comuniSelect = document.getElementById('comuni');
@@ -159,9 +179,14 @@ document.addEventListener('DOMContentLoaded', function() {
             agentNameInput.value = selectedOption.textContent.trim();
             agentNameInput.readOnly = true;
             
-            // Set the color from the data attribute
+            // Set the color, phone and email from the data attributes
             const agentColor = selectedOption.getAttribute('data-color');
+            const agentPhone = selectedOption.getAttribute('data-phone');
+            const agentEmail = selectedOption.getAttribute('data-email');
+            
             agentColorInput.value = agentColor || '#ff9800';
+            agentPhoneInput.value = agentPhone || '';
+            agentEmailInput.value = agentEmail || '';
             
             // Fetch agent's assigned comuni - aggiungiamo un timestamp per evitare la cache
             const agentTimestamp = new Date().getTime();
@@ -347,6 +372,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const formData = new FormData();
                 formData.append('agent_name', agentNameInput.value);
                 formData.append('agent_color', agentColorInput.value);
+                formData.append('agent_phone', agentPhoneInput.value);
+                formData.append('agent_email', agentEmailInput.value);
                 formData.append('agent_id', selectedAgentId); // Aggiungiamo l'ID dell'agente
                 // Non includiamo alcun comune, così verranno tutti rimossi
                 

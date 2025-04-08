@@ -38,6 +38,7 @@
                         <thead>
                             <tr>
                                 <th scope="col">Nome Agente</th>
+                                <th scope="col">Contatti</th>
                                 <th scope="col">Data Registrazione</th>
                                 <th scope="col">Comuni Assegnati</th>
                                 <th scope="col">Azioni</th>
@@ -50,6 +51,28 @@
                                     <div class="d-flex align-items-center">
                                         <div style="width: 20px; height: 20px; background-color: {{ agent.color }}; border-radius: 50%; margin-right: 10px; border: 1px solid #333;"></div>
                                         {{ agent.name }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column mb-1">
+                                        {% if agent.phone %}
+                                        <div class="d-flex align-items-center mb-1">
+                                            <i class="fas fa-phone text-primary me-2"></i>
+                                            <span>{{ agent.phone }}</span>
+                                            <a href="https://wa.me/{{ agent.phone|replace(' ', '')|replace('+', '') }}" target="_blank" class="btn btn-sm btn-success ms-2" title="Contatta su WhatsApp">
+                                                <i class="fab fa-whatsapp"></i>
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                        {% if agent.email %}
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-envelope text-primary me-2"></i>
+                                            <a href="mailto:{{ agent.email }}">{{ agent.email }}</a>
+                                        </div>
+                                        {% endif %}
+                                        {% if not agent.phone and not agent.email %}
+                                        <span class="text-muted">Nessun contatto</span>
+                                        {% endif %}
                                     </div>
                                 </td>
                                 <td>{{ agent.registration_date.strftime('%d/%m/%Y %H:%M') }}</td>
