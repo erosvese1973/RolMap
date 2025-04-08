@@ -355,6 +355,7 @@ def visualizza_mappa():
     
     # Se siamo in modalità POST ma l'agente non esiste nel database, 
     # usiamo direttamente i dati del form
+    agent_phone = None  # Inizializziamo la variabile
     if request.method == 'POST':
         # Cerca l'agente nel database solo se ha un ID valido
         if agent_id and agent_id != 'new':
@@ -362,6 +363,7 @@ def visualizza_mappa():
             if existing_agent:
                 agent_color = existing_agent.color
                 agent_id = existing_agent.id  # Assicuriamoci di avere l'ID corretto
+                agent_phone = existing_agent.phone  # Recuperiamo il numero di telefono
         else:
             agent_id = None
     else:
@@ -369,6 +371,7 @@ def visualizza_mappa():
         agent = models.Agent.query.filter_by(name=agent_name).first()
         agent_color = agent.color if agent else '#ff9800'  # Default orange
         agent_id = agent.id if agent else None
+        agent_phone = agent.phone if agent else None  # Recuperiamo il numero di telefono
     
     # Get Google Maps API key from environment
     google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
@@ -380,6 +383,7 @@ def visualizza_mappa():
                           agent_name=agent_name, 
                           agent_color=agent_color,
                           agent_id=agent_id,  # Passa l'ID dell'agente al template
+                          agent_phone=agent_phone,  # Passiamo il numero di telefono al template
                           comuni=comuni_details,
                           comune_ids=unique_comune_ids,
                           google_maps_api_key=google_maps_api_key)
@@ -581,7 +585,8 @@ def mappa_completa():
                     'region': comune_row.iloc[0]['regione'],
                     'agent_id': agent.id,
                     'agent_name': agent.name,
-                    'agent_color': agent_color
+                    'agent_color': agent_color,
+                    'agent_phone': agent.phone  # Aggiungiamo il numero di telefono
                 }
                 agent_comuni.append(comune_info)
                 all_comuni_details.append(comune_info)

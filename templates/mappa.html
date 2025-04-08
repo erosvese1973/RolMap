@@ -257,13 +257,12 @@ function fetchGeoJSON() {
                         let popupContent = `
                             <div>
                                 <h6>${name}</h6>
-                                <p>Codice: ${id}</p>
-                                <p>Agente: {{ agent_name }}</p>
-                            `;
-                            
-                        // Non mostriamo più l'avviso per i poligoni di fallback
+                                <p><strong>Agente:</strong> {{ agent_name }}</p>
+                                {% if agent_phone %}
+                                <p><strong>Telefono:</strong> {{ agent_phone }}</p>
+                                {% endif %}
+                            </div>`;
                         
-                        popupContent += `</div>`;
                         
                         layer.bindPopup(popupContent);
                     }
