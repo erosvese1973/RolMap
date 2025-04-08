@@ -2,6 +2,13 @@
 
 {% block head %}
 <title>Visualizzazione Mappa Territori</title>
+<!-- Include Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" 
+      crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" 
+        crossorigin=""></script>
 <style>
     #map {
         height: 500px;
@@ -11,6 +18,7 @@
         overflow: hidden;
         border: 1px solid #ddd;
         background-color: #f5f5f5;
+        z-index: 1;
     }
     .map-container {
         position: relative;
@@ -23,7 +31,12 @@
         padding: 15px;
         border-radius: 5px;
         max-width: 300px;
-        z-index: 10;
+        z-index: 400;
+        color: white;
+    }
+    .leaflet-popup-content h6 {
+        margin-top: 0;
+        font-weight: bold;
     }
 </style>
 {% endblock %}
@@ -68,8 +81,8 @@
                 <div class="map-container">
                     <div id="map"></div>
                     <div class="map-overlay">
-                        <h6 class="text-white">{{ agent_name }}</h6>
-                        <p class="text-white mb-0">
+                        <h6>{{ agent_name }}</h6>
+                        <p class="mb-0">
                             <small>{{ comuni|length }} comuni assegnati</small>
                         </p>
                     </div>
@@ -81,85 +94,74 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Google Maps JavaScript API with the actual API key -->
-<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" 
-        async defer></script>
-
 <script>
 const comune_ids = {{ comune_ids|tojson }};
 let map;
 
-function initMap() {
-    // Initialize the map centered on Italy
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 41.9, lng: 12.5 }, // Center of Italy
-        zoom: 6,
-        mapTypeId: 'terrain',
-        styles: [
-            {
-                "featureType": "administrative.locality",
-                "elementType": "labels",
-                "stylers": [{ "visibility": "on" }]
-            },
-            {
-                "featureType": "administrative.neighborhood",
-                "elementType": "labels",
-                "stylers": [{ "visibility": "off" }]
-            }
-        ]
-    });
-
-    // Fetch GeoJSON data for the selected municipalities
+// Initialize the map when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Create the Leaflet map centered on Italy
+    map = L.map('map').setView([41.9, 12.5], 6);
+    
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Add a marker for each comune in the list
+    const markers = [];
+    {% for comune in comuni %}
+        // Create marker for comune
+        const marker = L.marker([
+            // These are dummy coordinates since we don't have real ones
+            // In a real app, you would store lat/lng in your DB
+            41.9 + (Math.random() * 0.5 - 0.25), 
+            12.5 + (Math.random() * 0.5 - 0.25)
+        ]).addTo(map);
+        
+        // Add popup with comune info
+        marker.bindPopup(`
+            <div>
+                <h6>{{ comune.name }}</h6>
+                <p>Provincia: {{ comune.province }}</p>
+                <p>Regione: {{ comune.region }}</p>
+                <p>Agente: {{ agent_name }}</p>
+            </div>
+        `);
+        
+        markers.push(marker);
+    {% endfor %}
+    
+    // If we have markers, create a group and fit the map to its bounds
+    if (markers.length > 0) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds(), {padding: [50, 50]});
+    }
+    
+    // Create a polygon representing a territory
+    // This is a sample polygon centered around Rome
+    const polygon = L.polygon([
+        [41.8, 12.4],
+        [41.8, 12.6],
+        [42.0, 12.6],
+        [42.0, 12.4]
+    ], {
+        color: '#FF5722',
+        fillColor: '#FF9800',
+        fillOpacity: 0.5,
+        weight: 2
+    }).addTo(map);
+    
+    polygon.bindPopup("<b>Area di esempio</b><br>Territorio dell'agente");
+    
+    // Fetch additional GeoJSON data from the server
     fetchGeoJSON();
-}
+});
 
 function fetchGeoJSON() {
     console.log("Fetching GeoJSON data for comuni:", comune_ids);
     
-    // Create a simple polygon for testing
-    const simpleData = {
-        "type": "FeatureCollection",
-        "features": [
-            {
-                "type": "Feature",
-                "properties": {
-                    "id": "test",
-                    "name": "Test Comune"
-                },
-                "geometry": {
-                    "type": "Polygon",
-                    "coordinates": [
-                        [
-                            [12.4, 41.8],
-                            [12.6, 41.8],
-                            [12.6, 42.0],
-                            [12.4, 42.0],
-                            [12.4, 41.8]
-                        ]
-                    ]
-                }
-            }
-        ]
-    };
-    
-    // Add the test GeoJSON to the map
-    map.data.addGeoJson(simpleData);
-    
-    // Style the features
-    map.data.setStyle({
-        fillColor: '#FF9800',
-        fillOpacity: 0.5,
-        strokeColor: '#FF5722',
-        strokeWeight: 2
-    });
-    
-    // Center the map on the test polygon
-    const bounds = new google.maps.LatLngBounds();
-    bounds.extend(new google.maps.LatLng(41.8, 12.4));
-    bounds.extend(new google.maps.LatLng(42.0, 12.6));
-    map.fitBounds(bounds);
-    
-    // Also try to fetch real data from the server
+    // Fetch GeoJSON data from the server
     fetch('{{ url_for("get_geojson") }}', {
         method: 'POST',
         headers: {
@@ -172,72 +174,36 @@ function fetchGeoJSON() {
         console.log("Server response:", geojson);
         
         // Add the GeoJSON data to the map
-        map.data.addGeoJson(geojson);
+        const geoJsonLayer = L.geoJSON(geojson, {
+            style: {
+                color: '#FF5722',
+                fillColor: '#FF9800',
+                fillOpacity: 0.5,
+                weight: 2
+            },
+            onEachFeature: function(feature, layer) {
+                // Add popup with feature info
+                const props = feature.properties;
+                const id = props ? props.id : 'Unknown';
+                const name = props ? props.name : 'Unknown Municipality';
+                
+                layer.bindPopup(`
+                    <div>
+                        <h6>${name}</h6>
+                        <p>Codice: ${id}</p>
+                        <p>Agente: {{ agent_name }}</p>
+                    </div>
+                `);
+            }
+        }).addTo(map);
         
-        // Style the features (municipalities)
-        map.data.setStyle({
-            fillColor: '#FF9800',
-            fillOpacity: 0.5,
-            strokeColor: '#FF5722',
-            strokeWeight: 2
-        });
-        
-        // Add click listeners to show info about each municipality
-        map.data.addListener('click', function(event) {
-            const properties = event.feature.getProperty('properties');
-            const id = properties ? properties.id : 'Unknown';
-            const name = properties ? properties.name : 'Unknown Municipality';
-            
-            const infoWindow = new google.maps.InfoWindow({
-                content: `<div>
-                            <h6>${name}</h6>
-                            <p>Codice: ${id}</p>
-                            <p>Agente: {{ agent_name }}</p>
-                          </div>`
-            });
-            
-            infoWindow.setPosition(event.latLng);
-            infoWindow.open(map);
-        });
-        
-        // Calculate and center the map on the territories
-        centerMapOnTerritories(geojson);
+        // Fit map to GeoJSON boundaries
+        if (geojson.features && geojson.features.length > 0) {
+            map.fitBounds(geoJsonLayer.getBounds());
+        }
     })
     .catch(error => {
         console.error('Error fetching GeoJSON:', error);
-        mapElement.innerHTML = '<div class="alert alert-danger">Errore nel caricamento dei dati geografici. Riprova più tardi.</div>';
-    });
-}
-
-function centerMapOnTerritories(geojson) {
-    // If there's no GeoJSON data, center on Italy
-    if (!geojson || !geojson.features || geojson.features.length === 0) {
-        map.setCenter({ lat: 41.9, lng: 12.5 });
-        map.setZoom(6);
-        return;
-    }
-    
-    // Create bounds object to contain all features
-    const bounds = new google.maps.LatLngBounds();
-    
-    // Process each feature to extend the bounds
-    geojson.features.forEach(feature => {
-        if (feature.geometry && feature.geometry.type === 'Polygon') {
-            // For polygons, add each coordinate point to the bounds
-            feature.geometry.coordinates[0].forEach(coord => {
-                bounds.extend(new google.maps.LatLng(coord[1], coord[0]));
-            });
-        }
-    });
-    
-    // Fit the map to the bounds
-    map.fitBounds(bounds);
-    
-    // Set a minimum zoom level if the area is too small
-    google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
-        if (map.getZoom() > 12) {
-            map.setZoom(12);
-        }
     });
 }
 </script>
