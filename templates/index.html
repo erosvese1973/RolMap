@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block head %}
-<title>Gestione Territori - Selezione Comune</title>
+<title>Gestione Comuni - Selezione Comune</title>
 {% endblock %}
 
 {% block content %}
@@ -12,7 +12,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="mb-0">
                         <i class="fas fa-map-marker-alt me-2"></i>
-                        Assegnazione Territori agli Agenti
+                        Assegnazione Comuni agli Agenti
                     </h4>
 
                 </div>
@@ -24,7 +24,7 @@
                     <div class="alert alert-info mb-4">
                         <i class="fas fa-user-tie me-2"></i>
                         <strong>Agente:</strong> {{ edit_agent.name }}
-                        <div class="badge ms-2" style="background-color: {{ edit_agent.color }};">Colore territorio</div>
+                        <div class="badge ms-2" style="background-color: {{ edit_agent.color }};">Colore comuni</div>
                     </div>
                     {% endif %}
                     
@@ -177,11 +177,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const changeEvent = new Event('change');
             agentSelect.dispatchEvent(changeEvent);
             
-            // Scroll to the territory selection section
-            const territorySection = document.querySelector('.form-section');
-            if (territorySection) {
+            // Scroll to the municipality selection section
+            const municipalitySection = document.querySelector('.form-section');
+            if (municipalitySection) {
                 setTimeout(() => {
-                    territorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    municipalitySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }, 300);
             }
         }
