@@ -287,8 +287,8 @@ def visualizza_mappa():
     agent_name = session.get('agent_name')
     comune_ids = session.get('comune_ids', [])
     
-    if not agent_name or not comune_ids:
-        flash('Seleziona prima un agente e i comuni', 'warning')
+    if not agent_name:
+        flash('Seleziona prima un agente', 'warning')
         return redirect(url_for('index'))
     
     # Get comune details for display

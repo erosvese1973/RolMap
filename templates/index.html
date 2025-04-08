@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Clear selected comuni
             selectedComuniMap.clear();
-            updateSelectedComuniDisplay();
+            updateSelectedComuniDisplay(); // Aggiorna stato del bottone "Visualizza Mappa"
         } else if (selectedValue) {
             // Selected existing agent
             const selectedOption = this.options[this.selectedIndex];
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Clear selected comuni
             selectedComuniMap.clear();
-            updateSelectedComuniDisplay();
+            updateSelectedComuniDisplay(); // Aggiorna stato del bottone "Visualizza Mappa"
         }
     });
     
@@ -402,13 +402,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear current display
         selectedComuniContainer.innerHTML = '';
         
+        // Il bottone "Visualizza Mappa" è sempre abilitato se abbiamo un agente selezionato
+        const isAgentSelected = agentSelect.value && agentSelect.value !== '';
+        submitBtn.disabled = !isAgentSelected;
+        
         if (selectedComuniMap.size === 0) {
             noComuniMessage.style.display = 'block';
-            submitBtn.disabled = true;
             clearComuniBtn.disabled = true;
         } else {
             noComuniMessage.style.display = 'none';
-            submitBtn.disabled = false;
             clearComuniBtn.disabled = false;
             
             // Add each selected comune as a badge
