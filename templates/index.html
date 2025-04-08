@@ -121,13 +121,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Function to preselect agent if edit parameter is present
     function checkForPreselectedAgent() {
-        // Check if an agent was preselected via URL (from "Assegna Comuni" button)
-        const urlParams = new URLSearchParams(window.location.search);
-        const editAgentId = urlParams.get('edit');
+        // Check if an agent was preselected (either via URL or directly from template)
+        const editAgentId = agentSelect.value;
         
         if (editAgentId) {
-            // Automatically select this agent in the dropdown
-            agentSelect.value = editAgentId;
+            console.log("Preselected agent ID:", editAgentId);
             
             // Trigger the change event to load agent data
             const changeEvent = new Event('change');
