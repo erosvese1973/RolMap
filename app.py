@@ -291,9 +291,15 @@ def visualizza_mappa():
         flash('Seleziona prima un agente', 'warning')
         return redirect(url_for('index'))
     
-    # Get comune details for display
+    # Get comune details for display, removing duplicates
     comuni_details = []
+    processed_ids = set()  # Set per tracciare gli ID già elaborati
     for comune_id in comune_ids:
+        # Salta se questo ID è già stato elaborato
+        if comune_id in processed_ids:
+            continue
+            
+        processed_ids.add(comune_id)  # Marca questo ID come elaborato
         comune_row = comuni_data[comuni_data['codice'] == comune_id]
         if not comune_row.empty:
             comuni_details.append({
@@ -310,11 +316,14 @@ def visualizza_mappa():
     # Get Google Maps API key from environment
     google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
     
+    # Aggiorna anche la lista degli ID dei comuni eliminando i duplicati
+    unique_comune_ids = list(processed_ids)
+    
     return render_template('mappa.html', 
                           agent_name=agent_name, 
                           agent_color=agent_color,
                           comuni=comuni_details,
-                          comune_ids=comune_ids,
+                          comune_ids=unique_comune_ids,
                           google_maps_api_key=google_maps_api_key)
 
 @app.route('/get_geojson', methods=['POST'])
