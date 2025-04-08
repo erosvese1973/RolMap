@@ -23,17 +23,6 @@
     .map-container {
         position: relative;
     }
-    .map-overlay {
-        position: absolute;
-        bottom: 20px;
-        left: 20px;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 15px;
-        border-radius: 5px;
-        max-width: 300px;
-        z-index: 400;
-        color: white;
-    }
     .leaflet-popup-content h6 {
         margin-top: 0;
         font-weight: bold;
@@ -66,12 +55,6 @@
                 <h5 class="mb-3">Mappa comuni</h5>
                 <div class="map-container mb-4">
                     <div id="map"></div>
-                    <div class="map-overlay">
-                        <h6>{{ agent_name }}</h6>
-                        <p class="mb-0">
-                            <small>{{ comuni|length }} comuni assegnati</small>
-                        </p>
-                    </div>
                 </div>
                 
                 <h5 class="mb-3">Comuni selezionati ({{ comuni|length }})</h5>
@@ -151,31 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 1000);
         
-        // Creazione del pulsante di controllo per la legenda
-        const legendControl = L.control({position: 'bottomright'});
-        legendControl.onAdd = function() {
-            const div = L.DomUtil.create('div', 'info legend');
-            div.style.backgroundColor = 'white';
-            div.style.padding = '10px';
-            div.style.borderRadius = '5px';
-            div.style.border = '1px solid #ccc';
-            div.innerHTML = `
-                <h6 style="margin-top: 0;">Legenda</h6>
-                <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <div style="width: 20px; height: 20px; background-color: {{ agent_color }}; opacity: 0.7; border: 2px solid #333;"></div>
-                    <span style="margin-left: 5px;">Comuni di {{ agent_name }}</span>
-                </div>
-                <p style="font-size: 0.8em; margin-top: 5px;">Ogni agente ha un colore diverso per distinguere i propri comuni</p>
-                <div style="font-size: 0.9em; margin-top: 5px;">
-                    <strong>Agente:</strong> {{ agent_name }}<br>
-                    <strong>Comuni:</strong> ${comune_ids ? comune_ids.length : 0}
-                </div>
-            `;
-            return div;
-        };
-        legendControl.addTo(map);
-        
-        console.log("Legend added to map");
+        // Legenda rimossa come richiesto
     } catch (error) {
         console.error("Error initializing map:", error);
         document.getElementById('map').innerHTML = `
