@@ -116,8 +116,10 @@ def load_comuni_data():
         csv_path_istat = os.path.join('static', 'data', 'elenco_comuni_istat.csv')
         # Try to load from the complete list next
         csv_path_completo = os.path.join('static', 'data', 'elenco_comuni_completo.csv')
+        # ISTAT data from attached_assets
+        csv_path_attached = os.path.join('static', 'data', 'elenco_comuni.csv')
         # Base list as last resort
-        csv_path_base = os.path.join('static', 'data', 'elenco_comuni.csv')
+        csv_path_base = os.path.join('static', 'data', 'elenco_comuni_base.csv')
         
         # Check if the ISTAT file exists (preferito)
         if os.path.exists(csv_path_istat):
@@ -127,6 +129,19 @@ def load_comuni_data():
         elif os.path.exists(csv_path_completo):
             logger.info(f"Loading comuni data from {csv_path_completo}")
             df = pd.read_csv(csv_path_completo)
+        # Check if the attached ISTAT file exists
+        elif os.path.exists(csv_path_attached):
+            logger.info(f"Loading comuni data from {csv_path_attached}")
+            df = pd.read_csv(csv_path_attached, encoding='ISO-8859-1', sep=';')
+            # Rename and select columns to match the expected format
+            column_mapping = {
+                "Codice Comune formato alfanumerico": "codice",
+                "Denominazione in italiano": "comune",
+                "Denominazione dell'Unità territoriale sovracomunale \n(valida a fini statistici)": "provincia",
+                "Denominazione Regione": "regione"
+            }
+            df = df.rename(columns=column_mapping)
+            df = df[["codice", "comune", "provincia", "regione"]]
         # Otherwise check if the base file exists
         elif os.path.exists(csv_path_base):
             logger.info(f"Loading comuni data from {csv_path_base}")

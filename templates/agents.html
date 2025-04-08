@@ -111,9 +111,13 @@
                                                 Mappa
                                             </button>
                                         </form>
+                                        <button type="button" data-bs-toggle="modal" data-bs-target="#editContactModal{{ agent.id }}" class="btn btn-sm btn-secondary me-2">
+                                            <i class="fas fa-address-card me-1"></i>
+                                            Contatti
+                                        </button>
                                         <a href="{{ url_for('index') }}?edit={{ agent.id }}" class="btn btn-sm btn-secondary">
                                             <i class="fas fa-edit me-1"></i>
-                                            Modifica
+                                            Territori
                                         </a>
                                         <form action="{{ url_for('delete_agent', agent_id=agent.id) }}" method="post" 
                                               class="d-inline" onsubmit="return confirm('Sei sicuro di voler eliminare questo agente?');">
@@ -134,4 +138,40 @@
         </div>
     </div>
 </div>
+
+<!-- Modals per la modifica dei contatti degli agenti -->
+{% for agent in agents %}
+<div class="modal fade" id="editContactModal{{ agent.id }}" tabindex="-1" aria-labelledby="editContactModalLabel{{ agent.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editContactModalLabel{{ agent.id }}">
+                    <i class="fas fa-address-card me-2"></i>
+                    Modifica Contatti: {{ agent.name }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('update_agent_contacts', agent_id=agent.id) }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="agent_phone{{ agent.id }}" class="form-label">Numero di Cellulare</label>
+                        <input type="tel" class="form-control" id="agent_phone{{ agent.id }}" name="agent_phone" 
+                               value="{{ agent.phone or '' }}" placeholder="Es. +39 333 1234567">
+                        <div class="form-text">Include il prefisso internazionale per abilitare WhatsApp (es. +39)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="agent_email{{ agent.id }}" class="form-label">Indirizzo Email</label>
+                        <input type="email" class="form-control" id="agent_email{{ agent.id }}" name="agent_email" 
+                               value="{{ agent.email or '' }}" placeholder="email@esempio.com">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

@@ -627,6 +627,38 @@ def delete_agent(agent_id):
         flash(f'Errore durante l\'eliminazione: {str(e)}', 'danger')
         return redirect(url_for('list_agents'))
 
+@app.route('/update_agent_contacts/<int:agent_id>', methods=['POST'])
+def update_agent_contacts(agent_id):
+    """Update agent contact information (phone and email)"""
+    try:
+        agent = models.Agent.query.get(agent_id)
+        if not agent:
+            flash('Agente non trovato', 'danger')
+            return redirect(url_for('list_agents'))
+        
+        # Recupera i dati dal form
+        agent_phone = request.form.get('agent_phone', '')
+        agent_email = request.form.get('agent_email', '')
+        
+        # Aggiorna i contatti dell'agente
+        agent.phone = agent_phone
+        agent.email = agent_email
+        
+        # Salva le modifiche
+        db.session.commit()
+        
+        # Invalida la cache per assicurarsi che i dati siano aggiornati
+        db.session.expire_all()
+        db.session.close()
+        
+        flash(f'Contatti per {agent.name} aggiornati con successo', 'success')
+        return redirect(url_for('list_agents'))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in update_agent_contacts: {str(e)}")
+        flash(f'Errore durante l\'aggiornamento: {str(e)}', 'danger')
+        return redirect(url_for('list_agents'))
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
