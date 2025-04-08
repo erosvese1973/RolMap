@@ -2,6 +2,7 @@
 
 {% block head %}
 <title>Elenco Agenti e Comuni</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -44,26 +45,27 @@
                             {% for agent in agents %}
                             <tr>
                                 <td>
-                                    <form action="{{ url_for('update_agent_contacts', agent_id=agent.id) }}" method="post" class="d-flex align-items-center">
+                                    <div class="d-flex align-items-center">
                                         <button type="button" class="color-circle-btn" data-bs-toggle="modal" data-bs-target="#editColorModal{{ agent.id }}" style="width: 20px; height: 20px; background-color: {{ agent.color }}; border-radius: 50%; margin-right: 10px; border: 1px solid #333; cursor: pointer;" title="Modifica colore"></button>
                                         <div class="input-group input-group-sm me-2" style="max-width: 200px;">
-                                            <input type="text" class="form-control form-control-sm" 
-                                                  name="agent_name" value="{{ agent.name }}" 
+                                            <input type="text" class="form-control form-control-sm auto-save-field" 
+                                                  data-agent-id="{{ agent.id }}" 
+                                                  data-field-type="name" 
+                                                  value="{{ agent.name }}" 
                                                   placeholder="Nome agente" aria-label="Nome agente">
                                         </div>
-                                        <button type="submit" class="btn btn-sm btn-primary btn-sm">
-                                            <i class="fas fa-save"></i>
-                                        </button>
-                                    </form>
+                                    </div>
                                 </td>
                                 <td>
-                                    <form action="{{ url_for('update_agent_contacts', agent_id=agent.id) }}" method="post" class="d-flex flex-column">
+                                    <div class="d-flex flex-column">
                                         <div class="input-group input-group-sm mb-2">
                                             <span class="input-group-text" id="phone-addon-{{ agent.id }}">
                                                 <i class="fas fa-phone"></i>
                                             </span>
-                                            <input type="tel" class="form-control form-control-sm" 
-                                                  name="agent_phone" value="{{ agent.phone or '' }}" 
+                                            <input type="tel" class="form-control form-control-sm auto-save-field" 
+                                                  data-agent-id="{{ agent.id }}"
+                                                  data-field-type="phone"
+                                                  value="{{ agent.phone or '' }}" 
                                                   placeholder="Es. +39 333 1234567" aria-label="Cellulare"
                                                   aria-describedby="phone-addon-{{ agent.id }}">
                                             {% if agent.phone %}
@@ -74,20 +76,18 @@
                                             {% endif %}
                                         </div>
                                         
-                                        <div class="input-group input-group-sm mb-2">
+                                        <div class="input-group input-group-sm">
                                             <span class="input-group-text" id="email-addon-{{ agent.id }}">
                                                 <i class="fas fa-envelope"></i>
                                             </span>
-                                            <input type="email" class="form-control form-control-sm" 
-                                                  name="agent_email" value="{{ agent.email or '' }}" 
+                                            <input type="email" class="form-control form-control-sm auto-save-field" 
+                                                  data-agent-id="{{ agent.id }}"
+                                                  data-field-type="email"
+                                                  value="{{ agent.email or '' }}" 
                                                   placeholder="email@esempio.com" aria-label="Email"
                                                   aria-describedby="email-addon-{{ agent.id }}">
                                         </div>
-                                        
-                                        <button type="submit" class="btn btn-sm btn-primary align-self-end">
-                                            <i class="fas fa-save me-1"></i> Salva
-                                        </button>
-                                    </form>
+                                    </div>
                                 </td>
 
                                 <td>
@@ -153,39 +153,7 @@
 
 <!-- Modals per la modifica dei contatti e colori degli agenti -->
 {% for agent in agents %}
-<!-- Modal modifica contatti -->
-<div class="modal fade" id="editContactModal{{ agent.id }}" tabindex="-1" aria-labelledby="editContactModalLabel{{ agent.id }}" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="editContactModalLabel{{ agent.id }}">
-                    <i class="fas fa-address-card me-2"></i>
-                    Modifica Contatti: {{ agent.name }}
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="{{ url_for('update_agent_contacts', agent_id=agent.id) }}" method="post">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="agent_phone{{ agent.id }}" class="form-label">Numero di Cellulare</label>
-                        <input type="tel" class="form-control" id="agent_phone{{ agent.id }}" name="agent_phone" 
-                               value="{{ agent.phone or '' }}" placeholder="Es. +39 333 1234567">
-                        <div class="form-text">Include il prefisso internazionale per abilitare WhatsApp (es. +39)</div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="agent_email{{ agent.id }}" class="form-label">Indirizzo Email</label>
-                        <input type="email" class="form-control" id="agent_email{{ agent.id }}" name="agent_email" 
-                               value="{{ agent.email or '' }}" placeholder="email@esempio.com">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-                    <button type="submit" class="btn btn-primary">Salva</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
 
 <!-- Modal modifica colore -->
 <div class="modal fade" id="editColorModal{{ agent.id }}" tabindex="-1" aria-labelledby="editColorModalLabel{{ agent.id }}" aria-hidden="true">
@@ -198,28 +166,32 @@
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ url_for('update_agent_color', agent_id=agent.id) }}" method="post">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="agent_color{{ agent.id }}" class="form-label">Colore dell'agente</label>
-                        <div class="d-flex align-items-center">
-                            <input type="color" class="form-control form-control-color" 
-                                   id="agent_color{{ agent.id }}" name="agent_color" 
-                                   value="{{ agent.color }}" title="Scegli un colore">
-                            <div class="color-preview ms-3 p-3 border" style="background-color: {{ agent.color }}; width: 100px; height: 50px; border-radius: 4px;">
-                                Anteprima
-                            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="agent_color{{ agent.id }}" class="form-label">Colore dell'agente</label>
+                    <div class="d-flex align-items-center">
+                        <input type="color" class="form-control form-control-color auto-save-field" 
+                               id="agent_color{{ agent.id }}"
+                               data-agent-id="{{ agent.id }}"
+                               data-field-type="color"
+                               value="{{ agent.color }}" title="Scegli un colore">
+                        <div class="color-preview ms-3 p-3 border" style="background-color: {{ agent.color }}; width: 100px; height: 50px; border-radius: 4px;">
+                            Anteprima
                         </div>
-                        <div class="form-text">Questo colore viene utilizzato per identificare i comuni dell'agente sulla mappa</div>
                     </div>
+                    <div class="form-text">Questo colore viene utilizzato per identificare i comuni dell'agente sulla mappa</div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
-                    <button type="submit" class="btn btn-primary">Salva</button>
-                </div>
-            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Chiudi</button>
+            </div>
         </div>
     </div>
 </div>
 {% endfor %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/autosave.js') }}"></script>
 {% endblock %}

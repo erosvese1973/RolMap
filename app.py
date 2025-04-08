@@ -778,8 +778,65 @@ def update_agent_color(agent_id):
     except Exception as e:
         db.session.rollback()
         logger.error(f"Error in update_agent_color: {str(e)}")
-        flash(f'Errore durante l\'aggiornamento del colore: {str(e)}', 'danger')
-        return redirect(url_for('list_agents'))
+        
+@app.route('/api/update_agent_field/<int:agent_id>', methods=['POST'])
+def update_agent_field(agent_id):
+    """API per aggiornare un singolo campo di un agente senza ricaricare la pagina"""
+    try:
+        agent = models.Agent.query.get(agent_id)
+        if not agent:
+            return jsonify({'success': False, 'error': 'Agente non trovato'}), 404
+        
+        # Ottieni i dati dal JSON della richiesta
+        data = request.json
+        field_type = data.get('field_type')
+        value = data.get('value', '').strip()
+        
+        # Gestisci i diversi tipi di campo
+        if field_type == 'name':
+            # Controllo che il nome non sia già utilizzato da un altro agente
+            if value:
+                existing = models.Agent.query.filter_by(name=value).first()
+                if existing and existing.id != agent_id:
+                    return jsonify({'success': False, 'error': 'Nome già in uso da un altro agente'}), 400
+                agent.name = value
+            else:
+                return jsonify({'success': False, 'error': 'Il nome non può essere vuoto'}), 400
+                
+        elif field_type == 'phone':
+            agent.phone = value
+            
+        elif field_type == 'email':
+            agent.email = value
+            
+        elif field_type == 'color':
+            agent.color = value
+            
+        else:
+            return jsonify({'success': False, 'error': 'Tipo di campo non valido'}), 400
+            
+        # Salva le modifiche
+        db.session.commit()
+        
+        # Invalida la cache
+        db.session.expire_all()
+        
+        return jsonify({
+            'success': True, 
+            'message': f'Campo {field_type} aggiornato per {agent.name}',
+            'agent': {
+                'id': agent.id,
+                'name': agent.name,
+                'phone': agent.phone,
+                'email': agent.email,
+                'color': agent.color
+            }
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in update_agent_field API: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.errorhandler(404)
 def page_not_found(e):
