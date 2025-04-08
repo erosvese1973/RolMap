@@ -297,15 +297,35 @@ def submit():
         flash(f'Errore durante il salvataggio: {str(e)}', 'danger')
         return redirect(url_for('assegnazione'))
 
-@app.route('/visualizza_mappa')
+@app.route('/visualizza_mappa', methods=['GET', 'POST'])
 def visualizza_mappa():
     """Display the map with selected municipalities"""
-    agent_name = session.get('agent_name')
-    comune_ids = session.get('comune_ids', [])
-    
-    if not agent_name:
-        flash('Seleziona prima un agente', 'warning')
-        return redirect(url_for('assegnazione'))
+    if request.method == 'POST':
+        # Nuova logica: gestisci i dati inviati direttamente dal pulsante "Mappa"
+        agent_id = request.form.get('agent_id')
+        agent_name = request.form.get('agent_name')
+        agent_color = request.form.get('agent_color', '#ff9800')  # Default orange if not specified
+        
+        # Ottieni i comuni selezionati dal form
+        comune_ids = request.form.getlist('comuni')
+        
+        logger.info(f"Visualizzazione mappa richiesta direttamente: Agente={agent_name}, Comuni={comune_ids}")
+        
+        # Salva i dati in sessione per retrocompatibilità
+        session['agent_name'] = agent_name
+        session['comune_ids'] = comune_ids
+    else:
+        # Logica originale per richieste GET (retrocompatibilità)
+        agent_name = session.get('agent_name')
+        comune_ids = session.get('comune_ids', [])
+        
+        if not agent_name:
+            flash('Seleziona prima un agente', 'warning')
+            return redirect(url_for('assegnazione'))
+        
+        # Verifica se esiste un agente con il nome specificato
+        agent = models.Agent.query.filter_by(name=agent_name).first()
+        agent_color = agent.color if agent else '#ff9800'  # Default orange
     
     # Get comune details for display, removing duplicates
     comuni_details = []
@@ -325,9 +345,18 @@ def visualizza_mappa():
                 'region': comune_row.iloc[0]['regione']
             })
     
-    # Get agent details including color
-    agent = models.Agent.query.filter_by(name=agent_name).first()
-    agent_color = agent.color if agent else '#ff9800'  # Default orange if not found
+    # Se siamo in modalità POST ma l'agente non esiste nel database, 
+    # usiamo direttamente i dati del form
+    if request.method == 'POST':
+        # Cerca l'agente nel database solo se ha un ID valido
+        if agent_id and agent_id != 'new':
+            existing_agent = models.Agent.query.get(agent_id)
+            if existing_agent:
+                agent_color = existing_agent.color
+    else:
+        # Logica per richieste GET (la stessa di prima)
+        agent = models.Agent.query.filter_by(name=agent_name).first()
+        agent_color = agent.color if agent else '#ff9800'  # Default orange
     
     # Get Google Maps API key from environment
     google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')

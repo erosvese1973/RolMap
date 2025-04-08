@@ -84,6 +84,17 @@
                                 <!-- Selected comuni will be displayed here -->
                             </div>
                         </div>
+                        
+                        <!-- Pulsante Mappa -->
+                        <div class="mt-3">
+                            <button type="button" id="mapBtn" class="btn btn-primary" disabled>
+                                <i class="fas fa-map-marked-alt me-1"></i>
+                                Mappa
+                            </button>
+                            <small class="text-muted ms-2">
+                                Visualizza i comuni selezionati sulla mappa
+                            </small>
+                        </div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -456,12 +467,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear current display
         selectedComuniContainer.innerHTML = '';
         
+        // Ottieni il pulsante mappa
+        const mapBtn = document.getElementById('mapBtn');
+        
         if (selectedComuniMap.size === 0) {
             noComuniMessage.style.display = 'block';
             clearComuniBtn.disabled = true;
+            mapBtn.disabled = true; // Disattiva il pulsante mappa se non ci sono comuni
         } else {
             noComuniMessage.style.display = 'none';
             clearComuniBtn.disabled = false;
+            mapBtn.disabled = false; // Attiva il pulsante mappa quando ci sono comuni
             
             // Add each selected comune as a badge
             selectedComuniMap.forEach(comune => {
@@ -566,6 +582,52 @@ document.addEventListener('DOMContentLoaded', function() {
         comuniSelect.disabled = true;
         
         document.getElementById('agent_name').value = '';
+    });
+    
+    // Map button handler
+    const mapBtn = document.getElementById('mapBtn');
+    mapBtn.addEventListener('click', function() {
+        if (selectedComuniMap.size === 0) {
+            showToast('Seleziona almeno un comune da visualizzare sulla mappa', 'warning');
+            return;
+        }
+        
+        // Ottieni l'id dell'agente (se esiste)
+        const agentId = agentSelect.value;
+        const agentName = agentNameInput.value;
+        const agentColor = agentColorInput.value;
+        
+        // Costruisci la lista dei comuni selezionati
+        const comuniIds = Array.from(selectedComuniMap.keys());
+        
+        // Crea una form temporanea per inviare i dati
+        const tempForm = document.createElement('form');
+        tempForm.method = 'POST';
+        tempForm.action = '{{ url_for("visualizza_mappa") }}';
+        tempForm.style.display = 'none';
+        
+        // Aggiungi i parametri
+        const addHiddenField = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            tempForm.appendChild(input);
+        };
+        
+        addHiddenField('agent_id', agentId);
+        addHiddenField('agent_name', agentName);
+        addHiddenField('agent_color', agentColor);
+        
+        // Aggiungi tutti i comuni selezionati
+        comuniIds.forEach(id => {
+            addHiddenField('comuni', id);
+        });
+        
+        // Aggiungi la form al documento, invio e rimuovi
+        document.body.appendChild(tempForm);
+        tempForm.submit();
+        document.body.removeChild(tempForm);
     });
     
     // Initialize display
