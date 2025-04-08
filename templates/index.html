@@ -333,14 +333,65 @@ document.addEventListener('DOMContentLoaded', function() {
     clearComuniBtn.addEventListener('click', function() {
         // Confirm before clearing
         if (confirm('Sei sicuro di voler cancellare tutti i comuni selezionati?')) {
-            selectedComuniMap.clear();
-            updateSelectedComuniDisplay();
+            // Se abbiamo un agente esistente selezionato, dobbiamo inviare la rimozione al server
+            const selectedAgentId = agentSelect.value;
             
-            // Deselect all options in multi-select
-            if (!comuniSelect.disabled) {
-                Array.from(comuniSelect.options).forEach(option => {
-                    option.selected = false;
+            if (selectedAgentId && selectedAgentId !== 'new' && selectedComuniMap.size > 0) {
+                // Abbiamo un agente selezionato con comuni da rimuovere
+                // Inviamo una richiesta per salvare le modifiche (rimozione di tutti i comuni)
+                const formData = new FormData();
+                formData.append('agent_name', agentNameInput.value);
+                formData.append('agent_color', agentColorInput.value);
+                // Non includiamo alcun comune, così verranno tutti rimossi
+                
+                // Aggiungiamo un timestamp per evitare il caching
+                const clearTimestamp = new Date().getTime();
+                fetch('{{ url_for("submit") }}?_=' + clearTimestamp, {
+                    method: 'POST',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Risposta server non valida');
+                    }
+                    return response.text();
+                })
+                .then(() => {
+                    showToast('Comuni rimossi con successo dal database', 'success');
+                    // Svuota la mappa locale e aggiorna l'interfaccia
+                    selectedComuniMap.clear();
+                    updateSelectedComuniDisplay();
+                    
+                    // Deselect all options in multi-select
+                    if (!comuniSelect.disabled) {
+                        Array.from(comuniSelect.options).forEach(option => {
+                            option.selected = false;
+                        });
+                    }
+                    
+                    // Ricarichiamo la pagina per riflettere i cambiamenti nel database
+                    window.location.reload();
+                })
+                .catch(error => {
+                    console.error('Errore durante la cancellazione:', error);
+                    showToast('Errore durante la rimozione dal database', 'danger');
                 });
+            } else {
+                // Caso normale: solo UI, senza agente selezionato o senza comuni
+                selectedComuniMap.clear();
+                updateSelectedComuniDisplay();
+                
+                // Deselect all options in multi-select
+                if (!comuniSelect.disabled) {
+                    Array.from(comuniSelect.options).forEach(option => {
+                        option.selected = false;
+                    });
+                }
             }
         }
     });
