@@ -91,10 +91,6 @@
                             <i class="fas fa-undo me-1"></i>
                             Reset
                         </button>
-                        <a href="#" id="mapButton" class="btn btn-sm btn-info">
-                            <i class="fas fa-map me-1"></i>
-                            Mappa
-                        </a>
                     </div>
                 </form>
             </div>
@@ -116,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const comuniSelect = document.getElementById('comuni');
     const selectedComuniContainer = document.getElementById('selectedComuni');
     const noComuniMessage = document.getElementById('noComuniMessage');
-    const mapButton = document.getElementById('mapButton');
+
     const resetBtn = document.getElementById('resetBtn');
     const selectionForm = document.getElementById('selectionForm');
     
@@ -535,42 +531,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize display
     updateSelectedComuniDisplay();
-    
-    // Map button handler to open the map for currently selected agent
-    mapButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        const selectedAgentId = agentSelect.value;
-        
-        if (!selectedAgentId || selectedAgentId === 'new') {
-            showToast('Seleziona prima un agente esistente', 'warning');
-            return;
-        }
-        
-        // Create a form to submit to view the map directly
-        const mapForm = document.createElement('form');
-        mapForm.method = 'post';
-        mapForm.action = '{{ url_for("submit") }}';
-        
-        // Add agent name
-        const agentNameInput = document.createElement('input');
-        agentNameInput.type = 'hidden';
-        agentNameInput.name = 'agent_name';
-        agentNameInput.value = document.getElementById('agent_name').value;
-        mapForm.appendChild(agentNameInput);
-        
-        // Add all selected comuni IDs
-        selectedComuniMap.forEach(comune => {
-            const comuneInput = document.createElement('input');
-            comuneInput.type = 'hidden';
-            comuneInput.name = 'comuni';
-            comuneInput.value = comune.id;
-            mapForm.appendChild(comuneInput);
-        });
-        
-        // Submit form
-        document.body.appendChild(mapForm);
-        mapForm.submit();
-    });
     
     // Check for preselected agent from URL (called by "Assegna Comuni" button)
     checkForPreselectedAgent();
