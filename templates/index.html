@@ -16,11 +16,27 @@
             </div>
             <div class="card-body">
                 <form id="selectionForm" action="{{ url_for('submit') }}" method="post">
-                    <!-- Nome Agente -->
-                    <div class="mb-4">
-                        <label for="agent_name" class="form-label">Nome Agente</label>
-                        <input type="text" class="form-control" id="agent_name" name="agent_name" required>
-                        <div class="form-text">Inserisci il nome dell'agente a cui assegnare i territori</div>
+                    <!-- Selezione o Creazione Agente -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="agentSelect" class="form-label">Seleziona Agente Esistente</label>
+                            <select class="form-select" id="agentSelect">
+                                <option value="" selected>-- Seleziona un agente --</option>
+                                {% for agent in agents %}
+                                <option value="{{ agent.id }}" {% if edit_agent and edit_agent.id == agent.id %}selected{% endif %}>
+                                    {{ agent.name }}
+                                </option>
+                                {% endfor %}
+                                <option value="new">+ Crea nuovo agente</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="agent_name" class="form-label">Nome Agente</label>
+                            <input type="text" class="form-control" id="agent_name" name="agent_name" 
+                                   {% if edit_agent %}value="{{ edit_agent.name }}"{% endif %} required>
+                            <div class="form-text">Nome dell'agente da creare o modificare</div>
+                        </div>
                     </div>
 
                     <div class="row mb-4">
@@ -84,6 +100,8 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const agentSelect = document.getElementById('agentSelect');
+    const agentNameInput = document.getElementById('agent_name');
     const regionSelect = document.getElementById('region');
     const provinceSelect = document.getElementById('province');
     const comuniSelect = document.getElementById('comuni');
@@ -95,6 +113,65 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Selected comuni storage
     const selectedComuniMap = new Map();
+    
+    // Handle agent selection
+    agentSelect.addEventListener('change', function() {
+        const selectedValue = this.value;
+        
+        if (selectedValue === 'new') {
+            // Create new agent
+            agentNameInput.value = '';
+            agentNameInput.readOnly = false;
+            
+            // Clear selected comuni
+            selectedComuniMap.clear();
+            updateSelectedComuniDisplay();
+        } else if (selectedValue) {
+            // Selected existing agent
+            const selectedOption = this.options[this.selectedIndex];
+            agentNameInput.value = selectedOption.textContent.trim();
+            agentNameInput.readOnly = true;
+            
+            // Fetch agent's assigned comuni
+            fetch('{{ url_for("get_agent_comuni") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'agent_id=' + encodeURIComponent(selectedValue)
+            })
+            .then(response => response.json())
+            .then(comuni => {
+                // Clear current selection
+                selectedComuniMap.clear();
+                
+                // Add agent's comuni to selection
+                comuni.forEach(comune => {
+                    selectedComuniMap.set(comune.id, {
+                        id: comune.id,
+                        name: comune.name,
+                        province: comune.province,
+                        region: comune.region
+                    });
+                });
+                
+                // Update display
+                updateSelectedComuniDisplay();
+            })
+            .catch(error => {
+                console.error('Error fetching agent comuni:', error);
+                showToast('Errore nel caricamento dei comuni dell\'agente', 'danger');
+            });
+        } else {
+            // No agent selected
+            agentNameInput.value = '';
+            agentNameInput.readOnly = false;
+            
+            // Clear selected comuni
+            selectedComuniMap.clear();
+            updateSelectedComuniDisplay();
+        }
+    });
     
     // Update provinces when region changes
     regionSelect.addEventListener('change', function() {

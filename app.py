@@ -22,8 +22,10 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_secret_key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Configure SQLite database
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///agent_territories.db"
+# Configure database (PostgreSQL)
+# Fallback to SQLite if DATABASE_URL is not available
+database_url = os.environ.get("DATABASE_URL", "sqlite:///agent_territories.db")
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
@@ -48,7 +50,15 @@ with app.app_context():
 def index():
     """Main page with the agent registration and municipality selection form"""
     regions = sorted(comuni_data['regione'].unique())
-    return render_template('index.html', regions=regions)
+    agents = models.Agent.query.all()
+    
+    # Get agent_id from query parameter if provided
+    edit_agent_id = request.args.get('edit', type=int)
+    edit_agent = None
+    if edit_agent_id:
+        edit_agent = models.Agent.query.get(edit_agent_id)
+    
+    return render_template('index.html', regions=regions, agents=agents, edit_agent=edit_agent)
 
 @app.route('/get_provinces', methods=['POST'])
 def get_provinces():
@@ -229,6 +239,54 @@ def list_agents():
         })
     
     return render_template('agents.html', agents=agent_data)
+
+@app.route('/get_agent_comuni', methods=['POST'])
+def get_agent_comuni():
+    """Get municipalities assigned to an agent"""
+    agent_id = request.form.get('agent_id', type=int)
+    if not agent_id:
+        return jsonify([])
+    
+    agent = models.Agent.query.get(agent_id)
+    if not agent:
+        return jsonify([])
+    
+    # Get agent's assigned comuni
+    assignments = models.Assignment.query.filter_by(agent_id=agent.id).all()
+    comuni_list = []
+    
+    for assignment in assignments:
+        comune_row = comuni_data[comuni_data['codice'] == assignment.comune_id]
+        if not comune_row.empty:
+            comuni_list.append({
+                'id': assignment.comune_id,
+                'name': comune_row.iloc[0]['comune'],
+                'province': comune_row.iloc[0]['provincia'],
+                'region': comune_row.iloc[0]['regione']
+            })
+    
+    return jsonify(comuni_list)
+
+@app.route('/delete_agent/<int:agent_id>', methods=['POST'])
+def delete_agent(agent_id):
+    """Delete an agent and their municipality assignments"""
+    try:
+        agent = models.Agent.query.get(agent_id)
+        if not agent:
+            flash('Agente non trovato', 'danger')
+            return redirect(url_for('list_agents'))
+        
+        # Delete agent and all assignments (cascade delete)
+        db.session.delete(agent)
+        db.session.commit()
+        
+        flash(f'Agente {agent.name} eliminato con successo', 'success')
+        return redirect(url_for('list_agents'))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in delete_agent: {str(e)}")
+        flash(f'Errore durante l\'eliminazione: {str(e)}', 'danger')
+        return redirect(url_for('list_agents'))
 
 @app.errorhandler(404)
 def page_not_found(e):
