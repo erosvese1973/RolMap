@@ -65,12 +65,17 @@ def assegnazione():
     
     regions = sorted(comuni_data['regione'].unique())
     
-    # Get agent_id from query parameter if provided - ora è obbligatorio
-    edit_agent_id = request.args.get('edit', type=int)
+    # Verifica prima se è stato passato agent_id nel percorso
+    agent_id = request.args.get('agent_id', type=int)
+    
+    # Se non c'è agent_id, controlliamo se c'è il parametro 'edit' per retrocompatibilità
+    if not agent_id:
+        agent_id = request.args.get('edit', type=int)
+    
     edit_agent = None
     
-    if edit_agent_id:
-        edit_agent = models.Agent.query.get(edit_agent_id)
+    if agent_id:
+        edit_agent = models.Agent.query.get(agent_id)
         # Carichiamo anche gli agenti per mantenere compatibilità con altri funzioni JS
         agents = models.Agent.query.all()
         return render_template('index.html', regions=regions, agents=agents, edit_agent=edit_agent, import_time=import_time)
@@ -300,6 +305,9 @@ def submit():
 @app.route('/visualizza_mappa', methods=['GET', 'POST'])
 def visualizza_mappa():
     """Display the map with selected municipalities"""
+    # Inizializziamo agent_id per evitare warning
+    agent_id = None
+    
     if request.method == 'POST':
         # Nuova logica: gestisci i dati inviati direttamente dal pulsante "Mappa"
         agent_id = request.form.get('agent_id')
@@ -353,10 +361,14 @@ def visualizza_mappa():
             existing_agent = models.Agent.query.get(agent_id)
             if existing_agent:
                 agent_color = existing_agent.color
+                agent_id = existing_agent.id  # Assicuriamoci di avere l'ID corretto
+        else:
+            agent_id = None
     else:
         # Logica per richieste GET (la stessa di prima)
         agent = models.Agent.query.filter_by(name=agent_name).first()
         agent_color = agent.color if agent else '#ff9800'  # Default orange
+        agent_id = agent.id if agent else None
     
     # Get Google Maps API key from environment
     google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
@@ -367,6 +379,7 @@ def visualizza_mappa():
     return render_template('mappa.html', 
                           agent_name=agent_name, 
                           agent_color=agent_color,
+                          agent_id=agent_id,  # Passa l'ID dell'agente al template
                           comuni=comuni_details,
                           comune_ids=unique_comune_ids,
                           google_maps_api_key=google_maps_api_key)
