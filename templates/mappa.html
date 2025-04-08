@@ -153,9 +153,10 @@ document.addEventListener('DOMContentLoaded', function() {
             div.innerHTML = `
                 <h6 style="margin-top: 0;">Legenda</h6>
                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
-                    <div style="width: 20px; height: 20px; background-color: #FF9800; opacity: 0.5; border: 2px solid #FF5722;"></div>
+                    <div style="width: 20px; height: 20px; background-color: #8bc34a; opacity: 0.7; border: 2px solid #333;"></div>
                     <span style="margin-left: 5px;">Comuni assegnati</span>
                 </div>
+                <p style="font-size: 0.8em; margin-top: 5px;">I comuni vengono colorati in modo diverso per una migliore visualizzazione</p>
                 <div style="font-size: 0.9em; margin-top: 5px;">
                     <strong>Agente:</strong> {{ agent_name }}<br>
                     <strong>Comuni:</strong> ${comune_ids ? comune_ids.length : 0}
@@ -251,11 +252,23 @@ function fetchGeoJSON() {
         try {
             const geoJsonLayer = L.geoJSON(geojson, {
                 style: function(feature) {
+                    // Genera un colore casualo ma deterministico basato sull'ID del comune
+                    // Questo assicura che ogni comune abbia un colore diverso ma consistente
+                    let colors = ['#f44336', '#9c27b0', '#3f51b5', '#2196f3', '#00bcd4', 
+                                  '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b',
+                                  '#ffc107', '#ff9800', '#ff5722', '#795548', '#607d8b'];
+                    
+                    let id = feature.properties.id || "0";
+                    // Usa gli ultimi 2 caratteri dell'ID per determinare l'indice del colore
+                    let colorIndex = parseInt(id.slice(-2), 10) % colors.length;
+                    let fillColor = colors[colorIndex];
+                    
+                    // Assicura un buon contrasto usando un bordo più scuro del colore di riempimento
                     return {
-                        color: '#FF5722',
-                        fillColor: '#FF9800',
+                        color: '#333',
+                        fillColor: fillColor,
                         fillOpacity: 0.7,
-                        weight: 3,
+                        weight: 2,
                         opacity: 1
                     };
                 },

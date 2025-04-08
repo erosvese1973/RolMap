@@ -65,18 +65,23 @@ def get_geojson_from_wfs(comune_ids):
                         normalized_comuni_ids.append(comune_id_str)
                     # Se è solo un ID di comune senza prefisso della provincia (es. 042 per Lecco)
                     elif len(comune_id_str) <= 3:
-                        # Per i comuni della provincia di Lecco
-                        if comune_id_str.startswith('0'):
-                            normalized_comuni_ids.append(f"097{comune_id_str}")
-                        else:
-                            normalized_comuni_ids.append(f"097{comune_id_str.zfill(3)}")
-                    # Per altri formati (es. 97042)
+                        # Aggiungiamo codici per diverse province per aumentare la compatibilità
+                        normalized_comuni_ids.append(f"097{comune_id_str.zfill(3)}")  # Lecco
+                        normalized_comuni_ids.append(f"013{comune_id_str.zfill(3)}")  # Como
+                        normalized_comuni_ids.append(f"016{comune_id_str.zfill(3)}")  # Bergamo
+                    # Per altri formati (es. 97042 o 13042)
                     else:
                         # Se inizia con 97, è probabilmente un comune della provincia di Lecco (097)
                         if comune_id_str.startswith('97'):
                             normalized_comuni_ids.append(f"0{comune_id_str}")
-                        else:
+                        # Se inizia con 13, è probabilmente un comune della provincia di Como (013)
+                        elif comune_id_str.startswith('13'):
                             normalized_comuni_ids.append(comune_id_str)
+                            if len(comune_id_str) == 5:
+                                # Aggiungiamo anche il formato con lo zero davanti per sicurezza
+                                normalized_comuni_ids.append(f"0{comune_id_str}")
+                        # Tentiamo con la codifica del formato originale
+                        normalized_comuni_ids.append(comune_id_str)
                 
                 logger.info(f"Normalized comune IDs: {normalized_comuni_ids}")
                 

@@ -254,13 +254,41 @@ def get_geojson():
     try:
         # Prima di ottenere il GeoJSON, otteniamo i nomi reali dei comuni per i popup
         comuni_names = {}
+        # Creiamo un dizionario per mappare i formati diversi degli ID dei comuni
+        id_mapping = {}
+        
         for comune_id in comune_ids:
-            comune_row = comuni_data[comuni_data['codice'] == comune_id]
-            if not comune_row.empty:
-                comuni_names[comune_id] = comune_row.iloc[0]['comune']
-                logger.debug(f"Found name for comune {comune_id}: {comuni_names[comune_id]}")
-            else:
-                logger.warning(f"Comune ID not found in dataset: {comune_id}")
+            # Costruiamo le possibili varianti per l'ID del comune
+            comune_id_str = str(comune_id).strip()
+            variants = [comune_id_str]
+            
+            # Se è un codice di 6 cifre che inizia con 0, aggiungiamo anche la versione senza 0
+            if len(comune_id_str) == 6 and comune_id_str.startswith('0'):
+                variants.append(comune_id_str[1:])  # senza lo zero iniziale
+            
+            # Se è un id che inizia con 13 (Como), aggiungiamo anche con lo 0 davanti
+            if comune_id_str.startswith('13') and len(comune_id_str) == 5:
+                variants.append(f"0{comune_id_str}")
+                
+            # Se è un codice di 5 cifre che inizia con 97, aggiungiamo la versione con 0
+            if len(comune_id_str) == 5 and comune_id_str.startswith('97'):
+                variants.append(f"0{comune_id_str}")
+            
+            # Cerchiamo in tutte le varianti possibili
+            found = False
+            for variant in variants:
+                comune_row = comuni_data[comuni_data['codice'] == variant]
+                if not comune_row.empty:
+                    name = comune_row.iloc[0]['comune']
+                    comuni_names[comune_id_str] = name
+                    for v in variants:
+                        id_mapping[v] = comune_id_str
+                    logger.debug(f"Found name for comune {variant}: {name}")
+                    found = True
+                    break
+            
+            if not found:
+                logger.warning(f"Comune ID not found in dataset: {comune_id_str} (tried variants: {variants})")
         
         # Richiamiamo il servizio WFS per ottenere i poligoni
         geojson = get_geojson_from_wfs(comune_ids)
@@ -274,11 +302,20 @@ def get_geojson():
         for feature in geojson['features']:
             if 'properties' in feature and 'id' in feature['properties']:
                 comune_id = feature['properties']['id']
-                if comune_id in comuni_names:
-                    feature['properties']['name'] = comuni_names[comune_id]
+                
+                # Cerchiamo nel mapping degli ID (normalizzati)
+                mapped_id = id_mapping.get(comune_id, comune_id)
+                
+                if mapped_id in comuni_names:
+                    feature['properties']['name'] = comuni_names[mapped_id]
                 else:
-                    # Se non troviamo il nome, manteniamo almeno l'ID come identificativo
-                    feature['properties']['name'] = f"Comune {comune_id}"
+                    # Se non troviamo il nome, proviamo a cercarlo direttamente nel dataframe
+                    comune_row = comuni_data[comuni_data['codice'] == comune_id]
+                    if not comune_row.empty:
+                        feature['properties']['name'] = comune_row.iloc[0]['comune']
+                    else:
+                        # Se ancora non troviamo il nome, manteniamo almeno l'ID come identificativo
+                        feature['properties']['name'] = f"Comune {comune_id}"
         
         logger.info(f"Returning GeoJSON with {len(geojson['features'])} features")
         return jsonify(geojson)
