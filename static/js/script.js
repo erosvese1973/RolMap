@@ -142,4 +142,78 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Add new agent row functionality
+    const addNewAgentBtn = document.getElementById('addNewAgentBtn');
+    if (addNewAgentBtn) {
+        addNewAgentBtn.addEventListener('click', function() {
+            // Get table body
+            const tableBody = document.querySelector('table.table tbody');
+            
+            if (!tableBody) {
+                // If no table exists yet (first agent), reload the page
+                window.location.href = window.location.href;
+                return;
+            }
+            
+            // Create a new row
+            const newRow = document.createElement('tr');
+            newRow.id = 'new-agent-row';
+            newRow.className = 'bg-light';
+            
+            // Add the new row HTML
+            newRow.innerHTML = `
+                <td>
+                    <form action="${window.location.origin}/update_agent_contacts/new" method="post" class="d-flex align-items-center">
+                        <div style="width: 20px; height: 20px; background-color: #ff9800; border-radius: 50%; margin-right: 10px; border: 1px solid #333;"></div>
+                        <div class="input-group input-group-sm me-2" style="max-width: 200px;">
+                            <input type="text" class="form-control form-control-sm" 
+                                  name="agent_name" value="" 
+                                  placeholder="Nome nuovo agente" aria-label="Nome agente" required>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-success btn-sm">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </form>
+                </td>
+                <td>
+                    <div class="d-flex flex-column text-muted">
+                        <small>Completa la creazione dell'agente</small>
+                        <small>per modificare i contatti</small>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge bg-secondary">0</span>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled>
+                        <i class="fas fa-map me-1"></i>
+                        Mappa
+                    </button>
+                </td>
+            `;
+            
+            // Insert row at the beginning of the table
+            tableBody.insertBefore(newRow, tableBody.firstChild);
+            
+            // Scroll to the new row
+            newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Focus the name input
+            setTimeout(() => {
+                const nameInput = newRow.querySelector('input[name="agent_name"]');
+                if (nameInput) {
+                    nameInput.focus();
+                }
+            }, 100);
+            
+            // Disable the button to prevent multiple clicks
+            addNewAgentBtn.disabled = true;
+            
+            // Re-enable after 3 seconds
+            setTimeout(() => {
+                addNewAgentBtn.disabled = false;
+            }, 3000);
+        });
+    }
 });

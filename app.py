@@ -627,10 +627,41 @@ def delete_agent(agent_id):
         flash(f'Errore durante l\'eliminazione: {str(e)}', 'danger')
         return redirect(url_for('list_agents'))
 
-@app.route('/update_agent_contacts/<int:agent_id>', methods=['POST'])
+@app.route('/update_agent_contacts/<agent_id>', methods=['POST'])
 def update_agent_contacts(agent_id):
-    """Update agent contact information (phone and email)"""
+    """Update agent contact information or create a new agent"""
     try:
+        # Caso speciale per nuovi agenti
+        if agent_id == 'new':
+            # Recupera i dati dal form
+            agent_name = request.form.get('agent_name', '')
+            if not agent_name:
+                flash('Nome agente obbligatorio', 'danger')
+                return redirect(url_for('list_agents'))
+                
+            # Verifica se l'agente esiste già
+            existing_agent = models.Agent.query.filter_by(name=agent_name).first()
+            if existing_agent:
+                flash(f'Un agente con il nome "{agent_name}" esiste già', 'warning')
+                return redirect(url_for('list_agents'))
+                
+            # Crea un nuovo agente
+            new_agent = models.Agent(
+                name=agent_name,
+                phone='',
+                email='',
+                registration_date=datetime.now(),
+                color='#ff9800'  # Arancione default
+            )
+            db.session.add(new_agent)
+            db.session.commit()
+            db.session.expire_all()
+            
+            flash(f'Nuovo agente {agent_name} creato con successo', 'success')
+            return redirect(url_for('list_agents'))
+        
+        # Caso standard: aggiornamento agente esistente
+        agent_id = int(agent_id)  # Converti a intero
         agent = models.Agent.query.get(agent_id)
         if not agent:
             flash('Agente non trovato', 'danger')
@@ -639,12 +670,19 @@ def update_agent_contacts(agent_id):
         # Recupera i dati dal form
         agent_phone = request.form.get('agent_phone', '')
         agent_email = request.form.get('agent_email', '')
-        agent_name = request.form.get('agent_name', agent.name)  # Aggiungi supporto per il nome
+        agent_name = request.form.get('agent_name', agent.name)
+        
+        # Verifico se il nome è già utilizzato da un altro agente
+        if agent_name != agent.name:
+            existing_agent = models.Agent.query.filter_by(name=agent_name).first()
+            if existing_agent and existing_agent.id != agent_id:
+                flash(f'Un agente con il nome "{agent_name}" esiste già', 'warning')
+                return redirect(url_for('list_agents'))
         
         # Aggiorna i contatti dell'agente
         agent.phone = agent_phone
         agent.email = agent_email
-        agent.name = agent_name  # Aggiorna anche il nome
+        agent.name = agent_name
         
         # Salva le modifiche
         db.session.commit()
