@@ -1,0 +1,276 @@
+{% extends 'layout.html' %}
+
+{% block title %}Mappa Completa dei Territori{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h2 class="mb-4">Mappa Completa di Tutti i Territori</h2>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">Legenda Agenti</h5>
+                                <a href="{{ url_for('list_agents') }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-users me-1"></i> Gestione Agenti
+                                </a>
+                            </div>
+                            
+                            <div class="row legend-container">
+                                {% for agent in agents %}
+                                <div class="col-md-3 mb-2">
+                                    <div class="d-flex align-items-center">
+                                        <span class="legend-color me-2" style="background-color: {{ agent.color }};"></span>
+                                        <span>{{ agent.name }} ({{ agent.count }} comuni)</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="map-container mb-4">
+                        <div id="map"></div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h5 class="mb-3">Lista completa dei comuni assegnati</h5>
+                            
+                            {% set current_agent = '' %}
+                            {% for comune in all_comuni %}
+                                {% if current_agent != comune.agent_name %}
+                                    {% if not loop.first %}</div>{% endif %}
+                                    <div class="mb-3">
+                                        <h6 style="color: {{ comune.agent_color }}">
+                                            <i class="fas fa-user me-2"></i>{{ comune.agent_name }}
+                                        </h6>
+                                    {% set current_agent = comune.agent_name %}
+                                {% endif %}
+                                
+                                <div class="badge rounded-pill mb-1 me-1" style="background-color: {{ comune.agent_color }}">
+                                    {{ comune.name }} ({{ comune.province }})
+                                </div>
+                                
+                                {% if loop.last %}</div>{% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let map;
+    let mapData;
+    
+    function initMap() {
+        // Inizializza la mappa
+        map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 9,
+            center: { lat: 45.9, lng: 9.4 }, // Centrato sull'area Lecco/Como
+            mapTypeId: 'terrain',
+            mapTypeControl: true,
+            streetViewControl: false,
+            fullscreenControl: true
+        });
+        
+        // Aggiungi i dati GeoJSON alla mappa
+        mapData = new google.maps.Data();
+        mapData.setMap(map);
+        
+        // Carica i dati GeoJSON
+        fetchGeoJSON();
+    }
+    
+    function fetchGeoJSON() {
+        // Ottieni l'elenco degli ID dei comuni
+        const comuneIds = {{ comune_ids|tojson }};
+        
+        // Assicurati che ci siano comuni da visualizzare
+        if (!comuneIds || comuneIds.length === 0) {
+            console.warn('Nessun comune da visualizzare sulla mappa');
+            return;
+        }
+        
+        // Invia la richiesta al server
+        fetch('/get_geojson', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ comune_ids: comuneIds }),
+        })
+        .then(response => response.json())
+        .then(geojson => {
+            if (geojson.error) {
+                console.error('Errore nel caricamento del GeoJSON:', geojson.error);
+                return;
+            }
+            
+            // Configura lo stile dei poligoni in base all'agente associato
+            const agentColorMap = {};
+            {% for comune in all_comuni %}
+            agentColorMap['{{ comune.id }}'] = '{{ comune.agent_color }}';
+            {% endfor %}
+            
+            // Aggiungi i dati GeoJSON alla mappa
+            mapData.addGeoJson(geojson);
+            
+            // Imposta lo stile per ogni feature
+            mapData.setStyle(function(feature) {
+                const comuneId = feature.getProperty('id');
+                let fillColor = '#ff9800'; // Colore predefinito arancione
+                
+                // Rimuovi lo zero iniziale se presente (per compatibilità)
+                const normalizedId = comuneId.replace(/^0+/, '');
+                
+                // Cerca l'ID del comune nella mappa dei colori
+                if (agentColorMap[comuneId]) {
+                    fillColor = agentColorMap[comuneId];
+                } else if (agentColorMap[normalizedId]) {
+                    fillColor = agentColorMap[normalizedId];
+                }
+                
+                return {
+                    fillColor: fillColor,
+                    strokeWeight: 1,
+                    strokeColor: '#000',
+                    fillOpacity: 0.6,
+                    strokeOpacity: 0.8
+                };
+            });
+            
+            // Aggiungi etichette ai comuni
+            addInfoWindows();
+            
+            // Adatta la mappa per mostrare tutti i comuni
+            fitMapToFeatures();
+        })
+        .catch(error => {
+            console.error('Errore nella richiesta:', error);
+        });
+    }
+    
+    function addInfoWindows() {
+        // Crea un oggetto infoWindow da riutilizzare
+        const infoWindow = new google.maps.InfoWindow();
+        
+        // Aggiungi il listener per il click su ogni feature
+        mapData.addListener('click', function(event) {
+            // Ottieni le proprietà della feature
+            const properties = event.feature.getProperties();
+            
+            // Trova i dettagli del comune in base all'ID
+            const comuneId = properties.id;
+            let comuneDetails = null;
+            
+            // Cerca tra i comuni per trovare i dettagli
+            {% for comune in all_comuni %}
+            if ('{{ comune.id }}' === comuneId || '{{ comune.id }}' === comuneId.replace(/^0+/, '')) {
+                comuneDetails = {
+                    name: '{{ comune.name }}',
+                    province: '{{ comune.province }}',
+                    region: '{{ comune.region }}',
+                    agent_name: '{{ comune.agent_name }}',
+                    agent_color: '{{ comune.agent_color }}'
+                };
+            }
+            {% endfor %}
+            
+            if (!comuneDetails) {
+                comuneDetails = {
+                    name: properties.name || `Comune ${comuneId}`,
+                    province: 'N/D',
+                    region: 'N/D',
+                    agent_name: 'N/D',
+                    agent_color: '#ccc'
+                };
+            }
+            
+            // Crea il contenuto dell'infoWindow
+            const contentString = `
+                <div class="info-window">
+                    <h6 class="mb-1">${comuneDetails.name}</h6>
+                    <p class="mb-1">${comuneDetails.province}, ${comuneDetails.region}</p>
+                    <p class="mb-0">
+                        <span class="badge" style="background-color: ${comuneDetails.agent_color}">
+                            ${comuneDetails.agent_name}
+                        </span>
+                    </p>
+                </div>
+            `;
+            
+            // Imposta il contenuto e apri l'infoWindow
+            infoWindow.setContent(contentString);
+            infoWindow.setPosition(event.latLng);
+            infoWindow.open(map);
+        });
+    }
+    
+    function fitMapToFeatures() {
+        // Crea un oggetto bounds per contenere tutti i comuni
+        const bounds = new google.maps.LatLngBounds();
+        
+        // Itera su tutte le feature e aggiungi i punti ai bounds
+        mapData.forEach(function(feature) {
+            const geometry = feature.getGeometry();
+            
+            if (geometry) {
+                geometry.forEachLatLng(function(position) {
+                    bounds.extend(position);
+                });
+            }
+        });
+        
+        // Adatta la mappa per mostrare tutti i comuni
+        if (!bounds.isEmpty()) {
+            map.fitBounds(bounds);
+        }
+    }
+</script>
+
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap">
+</script>
+
+<style>
+    .map-container {
+        position: relative;
+        height: 500px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    #map {
+        height: 100%;
+        width: 100%;
+    }
+    
+    .legend-color {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border-radius: 3px;
+        border: 1px solid rgba(0,0,0,0.2);
+    }
+    
+    .legend-container {
+        max-height: 180px;
+        overflow-y: auto;
+    }
+    
+    .info-window {
+        padding: 5px;
+        min-width: 150px;
+    }
+</style>
+{% endblock %}

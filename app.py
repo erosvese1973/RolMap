@@ -469,6 +469,84 @@ def list_agents():
     
     return render_template('agents.html', agents=agent_data, import_time=import_time)
 
+@app.route('/mappa_completa')
+def mappa_completa():
+    """Visualizza la mappa completa con i territori di tutti gli agenti"""
+    # Force refresh of database tables to ensure we have the latest data
+    db.session.expire_all()
+    db.session.close()
+    
+    # Get Google Maps API key from environment
+    google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
+    
+    # Ottieni tutti gli agenti con i loro colori e comuni assegnati
+    agents = models.Agent.query.all()
+    agent_data = []
+    
+    # Mappa per tenere traccia di tutti i comuni e degli agenti associati
+    all_comuni_ids = []  # Lista di tutti gli ID dei comuni
+    all_comuni_details = []  # Lista con i dettagli di tutti i comuni
+    
+    # Colori predefiniti per gli agenti (backup)
+    default_colors = [
+        '#f44336', '#9c27b0', '#3f51b5', '#2196f3', '#00bcd4', 
+        '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b',
+        '#ffc107', '#ff9800', '#ff5722', '#795548', '#607d8b'
+    ]
+    
+    # Raccogliamo tutti i dati
+    for i, agent in enumerate(agents):
+        # Assicuriamoci che ogni agente abbia un colore
+        agent_color = agent.color if agent.color else default_colors[i % len(default_colors)]
+        
+        assignments = models.Assignment.query.filter_by(agent_id=agent.id).all()
+        agent_comuni = []
+        
+        for assignment in assignments:
+            comune_id = assignment.comune_id
+            all_comuni_ids.append(comune_id)
+            
+            comune_row = comuni_data[comuni_data['codice'] == comune_id]
+            if not comune_row.empty:
+                comune_info = {
+                    'id': comune_id,
+                    'name': comune_row.iloc[0]['comune'],
+                    'province': comune_row.iloc[0]['provincia'],
+                    'region': comune_row.iloc[0]['regione'],
+                    'agent_id': agent.id,
+                    'agent_name': agent.name,
+                    'agent_color': agent_color
+                }
+                agent_comuni.append(comune_info)
+                all_comuni_details.append(comune_info)
+        
+        agent_data.append({
+            'id': agent.id,
+            'name': agent.name,
+            'color': agent_color,
+            'comuni': agent_comuni,
+            'count': len(agent_comuni)
+        })
+    
+    # Rimuoviamo i comuni duplicati, preservando l'assegnazione univoca
+    # (Questo non dovrebbe essere necessario data la constraint sulla tabella Assignment,
+    # ma è un controllo di sicurezza)
+    processed_ids = set()
+    unique_comuni_details = []
+    for comune in all_comuni_details:
+        if comune['id'] not in processed_ids:
+            processed_ids.add(comune['id'])
+            unique_comuni_details.append(comune)
+    
+    # Ordiniamo gli agenti per nome per la visualizzazione nella legenda
+    agent_data.sort(key=lambda x: x['name'])
+    
+    return render_template('mappa_completa.html',
+                          agents=agent_data,
+                          all_comuni=unique_comuni_details,
+                          comune_ids=all_comuni_ids,
+                          google_maps_api_key=google_maps_api_key)
+
 @app.route('/get_agent_comuni', methods=['POST'])
 def get_agent_comuni():
     """Get municipalities assigned to an agent"""
