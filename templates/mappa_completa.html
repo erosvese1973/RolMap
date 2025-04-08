@@ -32,32 +32,8 @@
                         </div>
                     </div>
 
-                    <div class="map-container mb-4">
+                    <div class="map-container">
                         <div id="map"></div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h5 class="mb-3">Lista completa dei comuni assegnati</h5>
-                            
-                            {% set current_agent = '' %}
-                            {% for comune in all_comuni %}
-                                {% if current_agent != comune.agent_name %}
-                                    {% if not loop.first %}</div>{% endif %}
-                                    <div class="mb-3">
-                                        <h6 style="color: {{ comune.agent_color }}">
-                                            <i class="fas fa-user me-2"></i>{{ comune.agent_name }}
-                                        </h6>
-                                    {% set current_agent = comune.agent_name %}
-                                {% endif %}
-                                
-                                <div class="badge rounded-pill mb-1 me-1" style="background-color: {{ comune.agent_color }}">
-                                    {{ comune.name }} ({{ comune.province }})
-                                </div>
-                                
-                                {% if loop.last %}</div>{% endif %}
-                            {% endfor %}
-                        </div>
                     </div>
                 </div>
             </div>
@@ -244,7 +220,7 @@
 <style>
     .map-container {
         position: relative;
-        height: 500px;
+        height: 650px;
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
