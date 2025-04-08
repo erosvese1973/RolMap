@@ -487,7 +487,13 @@ def list_agents():
     # Generate a timestamp to force cache invalidation on client side
     import_time = int(time.time())
     
+    # Ottieni tutti gli agenti
     agents = models.Agent.query.all()
+    
+    # Ordina gli agenti per cognome (assumendo che il cognome sia l'ultima parola del nome completo)
+    # Esempio: da "Mario Rossi" prende "Rossi" come chiave di ordinamento
+    agents = sorted(agents, key=lambda agent: agent.name.split()[-1] if agent.name and ' ' in agent.name else agent.name)
+    
     agent_data = []
     
     # Colori predefiniti per gli agenti
@@ -600,8 +606,9 @@ def mappa_completa():
             processed_ids.add(comune['id'])
             unique_comuni_details.append(comune)
     
-    # Ordiniamo gli agenti per nome per la visualizzazione nella legenda
-    agent_data.sort(key=lambda x: x['name'])
+    # Ordiniamo gli agenti per cognome per la visualizzazione nella legenda
+    # Assumendo che il cognome sia l'ultima parola del nome completo
+    agent_data.sort(key=lambda x: x['name'].split()[-1] if x['name'] and ' ' in x['name'] else x['name'])
     
     return render_template('mappa_completa.html',
                           agents=agent_data,
