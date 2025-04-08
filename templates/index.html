@@ -148,6 +148,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Selected comuni storage
     const selectedComuniMap = new Map();
     
+    // Function to preselect agent if edit parameter is present
+    function checkForPreselectedAgent() {
+        // Check if an agent was preselected via URL (from "Assegna Comuni" button)
+        const urlParams = new URLSearchParams(window.location.search);
+        const editAgentId = urlParams.get('edit');
+        
+        if (editAgentId) {
+            // Automatically select this agent in the dropdown
+            agentSelect.value = editAgentId;
+            
+            // Trigger the change event to load agent data
+            const changeEvent = new Event('change');
+            agentSelect.dispatchEvent(changeEvent);
+            
+            // Scroll to the territory selection section
+            const territorySection = document.querySelector('.form-section');
+            if (territorySection) {
+                setTimeout(() => {
+                    territorySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+            }
+        }
+    }
+    
     // Handle agent selection
     agentSelect.addEventListener('change', function() {
         const selectedValue = this.value;
@@ -540,6 +564,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize display
     updateSelectedComuniDisplay();
+    
+    // Check for preselected agent from URL (called by "Assegna Comuni" button)
+    checkForPreselectedAgent();
 });
 </script>
 {% endblock %}
