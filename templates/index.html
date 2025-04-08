@@ -342,6 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const formData = new FormData();
                 formData.append('agent_name', agentNameInput.value);
                 formData.append('agent_color', agentColorInput.value);
+                formData.append('agent_id', selectedAgentId); // Aggiungiamo l'ID dell'agente
                 // Non includiamo alcun comune, così verranno tutti rimossi
                 
                 // Aggiungiamo un timestamp per evitare il caching

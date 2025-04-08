@@ -113,9 +113,18 @@ def submit():
         agent_name = request.form.get('agent_name')
         agent_color = request.form.get('agent_color', '#ff9800')  # Default to orange if not provided
         comune_ids = request.form.getlist('comuni')
+        agent_id = request.form.get('agent_id')  # Ottieni l'ID dell'agente dalla richiesta
         
-        if not agent_name or not comune_ids:
-            flash('Nome agente e almeno un comune sono obbligatori', 'danger')
+        # In caso di "Cancella Tutti", possiamo avere agent_name ma nessun comune
+        # In questo caso, non dobbiamo richiedere comuni se abbiamo l'ID di un agente esistente
+        if not agent_name:
+            flash('Nome agente obbligatorio', 'danger')
+            return redirect(url_for('index'))
+        
+        # Se non abbiamo comuni e non abbiamo un ID agente, è un errore
+        # Ma se abbiamo un ID agente, stiamo cancellando tutti i comuni dell'agente
+        if not comune_ids and not agent_id:
+            flash('Seleziona almeno un comune', 'danger')
             return redirect(url_for('index'))
         
         # Check if agent already exists
