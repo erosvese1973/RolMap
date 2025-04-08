@@ -1,0 +1,501 @@
+codice,comune,provincia,regione
+01001,Agliè,Torino,Piemonte
+01002,Airasca,Torino,Piemonte
+01003,Ala di Stura,Torino,Piemonte
+01004,Albiano d'Ivrea,Torino,Piemonte
+01005,Alice Superiore,Torino,Piemonte
+01006,Almese,Torino,Piemonte
+01007,Alpette,Torino,Piemonte
+01008,Alpignano,Torino,Piemonte
+01009,Andezeno,Torino,Piemonte
+01010,Andrate,Torino,Piemonte
+01011,Angrogna,Torino,Piemonte
+01012,Arignano,Torino,Piemonte
+01013,Avigliana,Torino,Piemonte
+01014,Azeglio,Torino,Piemonte
+01015,Bairo,Torino,Piemonte
+01016,Balangero,Torino,Piemonte
+01017,Baldissero Canavese,Torino,Piemonte
+01018,Baldissero Torinese,Torino,Piemonte
+01019,Balme,Torino,Piemonte
+01020,Banchette,Torino,Piemonte
+01021,Barbania,Torino,Piemonte
+01022,Bardonecchia,Torino,Piemonte
+01023,Barone Canavese,Torino,Piemonte
+01024,Beinasco,Torino,Piemonte
+01025,Bibiana,Torino,Piemonte
+02001,Alagna Valsesia,Vercelli,Piemonte
+02002,Albano Vercellese,Vercelli,Piemonte
+02003,Alice Castello,Vercelli,Piemonte
+02004,Arborio,Vercelli,Piemonte
+02005,Asigliano Vercellese,Vercelli,Piemonte
+02006,Balmuccia,Vercelli,Piemonte
+02007,Balocco,Vercelli,Piemonte
+02008,Bianzè,Vercelli,Piemonte
+02009,Boccioleto,Vercelli,Piemonte
+02010,Borgo d'Ale,Vercelli,Piemonte
+03001,Agrate Conturbia,Novara,Piemonte
+03002,Ameno,Novara,Piemonte
+03003,Armeno,Novara,Piemonte
+03004,Arona,Novara,Piemonte
+03005,Barengo,Novara,Piemonte
+04001,Acceglio,Cuneo,Piemonte
+04002,Aisone,Cuneo,Piemonte
+04003,Alba,Cuneo,Piemonte
+04004,Albaretto della Torre,Cuneo,Piemonte
+04005,Alto,Cuneo,Piemonte
+05001,Agliano Terme,Asti,Piemonte
+05002,Albugnano,Asti,Piemonte
+05003,Antignano,Asti,Piemonte
+05004,Aramengo,Asti,Piemonte
+05005,Asti,Asti,Piemonte
+06001,Acqui Terme,Alessandria,Piemonte
+06002,Albera Ligure,Alessandria,Piemonte
+06003,Alessandria,Alessandria,Piemonte
+06004,Alfiano Natta,Alessandria,Piemonte
+06005,Alice Bel Colle,Alessandria,Piemonte
+07001,Airole,Imperia,Liguria
+07002,Apricale,Imperia,Liguria
+07003,Aquila d'Arroscia,Imperia,Liguria
+07004,Armo,Imperia,Liguria
+07005,Aurigo,Imperia,Liguria
+08001,Alassio,Savona,Liguria
+08002,Albenga,Savona,Liguria
+08003,Albisola Superiore,Savona,Liguria
+08004,Albissola Marina,Savona,Liguria
+08005,Altare,Savona,Liguria
+09001,Arenzano,Genova,Liguria
+09002,Avegno,Genova,Liguria
+09003,Bargagli,Genova,Liguria
+09004,Bogliasco,Genova,Liguria
+09005,Borzonasca,Genova,Liguria
+10001,Ameglia,La Spezia,Liguria
+10002,Arcola,La Spezia,Liguria
+10003,Beverino,La Spezia,Liguria
+10004,Bolano,La Spezia,Liguria
+10005,Bonassola,La Spezia,Liguria
+12001,Alagna,Pavia,Lombardia
+12002,Albaredo Arnaboldi,Pavia,Lombardia
+12003,Albonese,Pavia,Lombardia
+12004,Albuzzano,Pavia,Lombardia
+12005,Arena Po,Pavia,Lombardia
+13001,Abbadia Cerreto,Lodi,Lombardia
+13002,Bertonico,Lodi,Lombardia
+13003,Boffalora d'Adda,Lodi,Lombardia
+13004,Borghetto Lodigiano,Lodi,Lombardia
+13005,Borgo San Giovanni,Lodi,Lombardia
+15001,Abbiategrasso,Milano,Lombardia
+15002,Albairate,Milano,Lombardia
+15003,Arconate,Milano,Lombardia
+15004,Arese,Milano,Lombardia
+15005,Arluno,Milano,Lombardia
+15006,Assago,Milano,Lombardia
+15007,Bareggio,Milano,Lombardia
+15008,Basiano,Milano,Lombardia
+15009,Basiglio,Milano,Lombardia
+15010,Bellinzago Lombardo,Milano,Lombardia
+15011,Bernate Ticino,Milano,Lombardia
+15012,Besate,Milano,Lombardia
+15013,Binasco,Milano,Lombardia
+15014,Boffalora sopra Ticino,Milano,Lombardia
+15015,Bollate,Milano,Lombardia
+15016,Bresso,Milano,Lombardia
+15017,Bubbiano,Milano,Lombardia
+15018,Buccinasco,Milano,Lombardia
+15019,Buscate,Milano,Lombardia
+15020,Bussero,Milano,Lombardia
+15021,Busto Garolfo,Milano,Lombardia
+15022,Calvignasco,Milano,Lombardia
+15023,Cambiago,Milano,Lombardia
+15024,Canegrate,Milano,Lombardia
+15025,Carpiano,Milano,Lombardia
+16001,Adrara San Martino,Bergamo,Lombardia
+16002,Adrara San Rocco,Bergamo,Lombardia
+16003,Albano Sant'Alessandro,Bergamo,Lombardia
+16004,Albino,Bergamo,Lombardia
+16005,Almè,Bergamo,Lombardia
+17001,Acquafredda,Brescia,Lombardia
+17002,Adro,Brescia,Lombardia
+17003,Agnosine,Brescia,Lombardia
+17004,Alfianello,Brescia,Lombardia
+17005,Anfo,Brescia,Lombardia
+18001,Albaredo per San Marco,Sondrio,Lombardia
+18002,Albosaggia,Sondrio,Lombardia
+18003,Andalo Valtellino,Sondrio,Lombardia
+18004,Aprica,Sondrio,Lombardia
+18005,Ardenno,Sondrio,Lombardia
+19001,Almenno San Bartolomeo,Como,Lombardia
+19002,Alzate Brianza,Como,Lombardia
+19003,Appiano Gentile,Como,Lombardia
+19004,Argegno,Como,Lombardia
+19005,Arosio,Como,Lombardia
+20001,Angera,Varese,Lombardia
+20002,Arcisate,Varese,Lombardia
+20003,Arsago Seprio,Varese,Lombardia
+20004,Azzate,Varese,Lombardia
+20005,Azzio,Varese,Lombardia
+21001,Aldeno,Trento,Trentino-Alto Adige
+21002,Amblar,Trento,Trentino-Alto Adige
+21003,Andalo,Trento,Trentino-Alto Adige
+21004,Arco,Trento,Trentino-Alto Adige
+21005,Avio,Trento,Trentino-Alto Adige
+22001,Aldino,Bolzano,Trentino-Alto Adige
+22002,Anterivo,Bolzano,Trentino-Alto Adige
+22003,Appiano sulla Strada del Vino,Bolzano,Trentino-Alto Adige
+22004,Avelengo,Bolzano,Trentino-Alto Adige
+22005,Badia,Bolzano,Trentino-Alto Adige
+23001,Affi,Verona,Veneto
+23002,Albaredo d'Adige,Verona,Veneto
+23003,Angiari,Verona,Veneto
+23004,Arcole,Verona,Veneto
+23005,Badia Calavena,Verona,Veneto
+24001,Agordo,Belluno,Veneto
+24002,Alano di Piave,Belluno,Veneto
+24003,Alleghe,Belluno,Veneto
+24004,Arsiè,Belluno,Veneto
+24005,Auronzo di Cadore,Belluno,Veneto
+25001,Abano Terme,Padova,Veneto
+25002,Agna,Padova,Veneto
+25003,Albignasego,Padova,Veneto
+25004,Anguillara Veneta,Padova,Veneto
+25005,Arquà Petrarca,Padova,Veneto
+26001,Adria,Rovigo,Veneto
+26002,Ariano nel Polesine,Rovigo,Veneto
+26003,Arquà Polesine,Rovigo,Veneto
+26004,Badia Polesine,Rovigo,Veneto
+26005,Bagnolo di Po,Rovigo,Veneto
+27001,Altivole,Treviso,Veneto
+27002,Arcade,Treviso,Veneto
+27003,Asolo,Treviso,Veneto
+27004,Borso del Grappa,Treviso,Veneto
+27005,Breda di Piave,Treviso,Veneto
+28001,Annone Veneto,Venezia,Veneto
+28002,Campagna Lupia,Venezia,Veneto
+28003,Campolongo Maggiore,Venezia,Veneto
+28004,Camponogara,Venezia,Veneto
+28005,Caorle,Venezia,Veneto
+29001,Adria,Vicenza,Veneto
+29002,Agugliaro,Vicenza,Veneto
+29003,Albettone,Vicenza,Veneto
+29004,Altavilla Vicentina,Vicenza,Veneto
+29005,Altissimo,Vicenza,Veneto
+30001,Aiello del Friuli,Udine,Friuli-Venezia Giulia
+30002,Amaro,Udine,Friuli-Venezia Giulia
+30003,Ampezzo,Udine,Friuli-Venezia Giulia
+30004,Aquileia,Udine,Friuli-Venezia Giulia
+30005,Arta Terme,Udine,Friuli-Venezia Giulia
+31001,Andreis,Pordenone,Friuli-Venezia Giulia
+31002,Arba,Pordenone,Friuli-Venezia Giulia
+31003,Aviano,Pordenone,Friuli-Venezia Giulia
+31004,Azzano Decimo,Pordenone,Friuli-Venezia Giulia
+31005,Barcis,Pordenone,Friuli-Venezia Giulia
+32001,Ampezzo,Gorizia,Friuli-Venezia Giulia
+32002,Capriva del Friuli,Gorizia,Friuli-Venezia Giulia
+32003,Cormons,Gorizia,Friuli-Venezia Giulia
+32004,Doberdò del Lago,Gorizia,Friuli-Venezia Giulia
+32005,Dolegna del Collio,Gorizia,Friuli-Venezia Giulia
+33001,Albareto,Parma,Emilia-Romagna
+33002,Bardi,Parma,Emilia-Romagna
+33003,Bedonia,Parma,Emilia-Romagna
+33004,Berceto,Parma,Emilia-Romagna
+33005,Bore,Parma,Emilia-Romagna
+34001,Albinea,Reggio Emilia,Emilia-Romagna
+34002,Bagnolo in Piano,Reggio Emilia,Emilia-Romagna
+34003,Baiso,Reggio Emilia,Emilia-Romagna
+34004,Bibbiano,Reggio Emilia,Emilia-Romagna
+34005,Boretto,Reggio Emilia,Emilia-Romagna
+35001,Anzola dell'Emilia,Bologna,Emilia-Romagna
+35002,Argelato,Bologna,Emilia-Romagna
+35003,Baricella,Bologna,Emilia-Romagna
+35004,Bentivoglio,Bologna,Emilia-Romagna
+35005,Bologna,Bologna,Emilia-Romagna
+36001,Argenta,Ferrara,Emilia-Romagna
+36002,Berra,Ferrara,Emilia-Romagna
+36003,Bondeno,Ferrara,Emilia-Romagna
+36004,Cento,Ferrara,Emilia-Romagna
+36005,Codigoro,Ferrara,Emilia-Romagna
+37001,Alfonsine,Ravenna,Emilia-Romagna
+37002,Bagnacavallo,Ravenna,Emilia-Romagna
+37003,Bagnara di Romagna,Ravenna,Emilia-Romagna
+37004,Brisighella,Ravenna,Emilia-Romagna
+37005,Casola Valsenio,Ravenna,Emilia-Romagna
+38001,Bagno di Romagna,Forlì-Cesena,Emilia-Romagna
+38002,Bertinoro,Forlì-Cesena,Emilia-Romagna
+38003,Borghi,Forlì-Cesena,Emilia-Romagna
+38004,Castrocaro Terme e Terra del Sole,Forlì-Cesena,Emilia-Romagna
+38005,Cesena,Forlì-Cesena,Emilia-Romagna
+39001,Casteldelci,Rimini,Emilia-Romagna
+39002,Bellaria-Igea Marina,Rimini,Emilia-Romagna
+39003,Cattolica,Rimini,Emilia-Romagna
+39004,Coriano,Rimini,Emilia-Romagna
+39005,Gemmano,Rimini,Emilia-Romagna
+40001,Aulla,Massa-Carrara,Toscana
+40002,Bagnone,Massa-Carrara,Toscana
+40003,Carrara,Massa-Carrara,Toscana
+40004,Casola in Lunigiana,Massa-Carrara,Toscana
+40005,Comano,Massa-Carrara,Toscana
+41001,Altopascio,Lucca,Toscana
+41002,Bagni di Lucca,Lucca,Toscana
+41003,Barga,Lucca,Toscana
+41004,Borgo a Mozzano,Lucca,Toscana
+41005,Camaiore,Lucca,Toscana
+42001,Abetone,Pistoia,Toscana
+42002,Agliana,Pistoia,Toscana
+42003,Buggiano,Pistoia,Toscana
+42004,Chiesina Uzzanese,Pistoia,Toscana
+42005,Cutigliano,Pistoia,Toscana
+43001,Agliana,Prato,Toscana
+43002,Cantagallo,Prato,Toscana
+43003,Carmignano,Prato,Toscana
+43004,Montemurlo,Prato,Toscana
+43005,Poggio a Caiano,Prato,Toscana
+44001,Bagno a Ripoli,Firenze,Toscana
+44002,Barberino di Mugello,Firenze,Toscana
+44003,Barberino Val d'Elsa,Firenze,Toscana
+44004,Borgo San Lorenzo,Firenze,Toscana
+44005,Calenzano,Firenze,Toscana
+45001,Arezzo,Arezzo,Toscana
+45002,Anghiari,Arezzo,Toscana
+45003,Badia Tedalda,Arezzo,Toscana
+45004,Bibbiena,Arezzo,Toscana
+45005,Bucine,Arezzo,Toscana
+46001,Abbadia San Salvatore,Siena,Toscana
+46002,Asciano,Siena,Toscana
+46003,Buonconvento,Siena,Toscana
+46004,Casole d'Elsa,Siena,Toscana
+46005,Castellina in Chianti,Siena,Toscana
+47001,Bibbona,Livorno,Toscana
+47002,Campiglia Marittima,Livorno,Toscana
+47003,Campo nell'Elba,Livorno,Toscana
+47004,Capoliveri,Livorno,Toscana
+47005,Capraia Isola,Livorno,Toscana
+48001,Bientina,Pisa,Toscana
+48002,Buti,Pisa,Toscana
+48003,Calci,Pisa,Toscana
+48004,Calcinaia,Pisa,Toscana
+48005,Capannoli,Pisa,Toscana
+49001,Arcidosso,Grosseto,Toscana
+49002,Campagnatico,Grosseto,Toscana
+49003,Capalbio,Grosseto,Toscana
+49004,Castel del Piano,Grosseto,Toscana
+49005,Castell'Azzara,Grosseto,Toscana
+51001,Alviano,Terni,Umbria
+51002,Amelia,Terni,Umbria
+51003,Arrone,Terni,Umbria
+51004,Attigliano,Terni,Umbria
+51005,Baschi,Terni,Umbria
+52001,Assisi,Perugia,Umbria
+52002,Bastia Umbra,Perugia,Umbria
+52003,Bettona,Perugia,Umbria
+52004,Bevagna,Perugia,Umbria
+52005,Cascia,Perugia,Umbria
+53001,Acquacanina,Macerata,Marche
+53002,Apiro,Macerata,Marche
+53003,Appignano,Macerata,Marche
+53004,Belforte del Chienti,Macerata,Marche
+53005,Bolognola,Macerata,Marche
+54001,Agugliano,Ancona,Marche
+54002,Ancona,Ancona,Marche
+54003,Arcevia,Ancona,Marche
+54004,Barbara,Ancona,Marche
+54005,Belvedere Ostrense,Ancona,Marche
+55001,Acquasanta Terme,Ascoli Piceno,Marche
+55002,Acquaviva Picena,Ascoli Piceno,Marche
+55003,Appignano del Tronto,Ascoli Piceno,Marche
+55004,Arquata del Tronto,Ascoli Piceno,Marche
+55005,Ascoli Piceno,Ascoli Piceno,Marche
+56001,Acquaviva Picena,Fermo,Marche
+56002,Altidona,Fermo,Marche
+56003,Amandola,Fermo,Marche
+56004,Belmonte Piceno,Fermo,Marche
+56005,Campofilone,Fermo,Marche
+57001,Accumoli,Rieti,Lazio
+57002,Amatrice,Rieti,Lazio
+57003,Antrodoco,Rieti,Lazio
+57004,Ascrea,Rieti,Lazio
+57005,Belmonte in Sabina,Rieti,Lazio
+58001,Affile,Roma,Lazio
+58002,Agosta,Roma,Lazio
+58003,Albano Laziale,Roma,Lazio
+58004,Allumiere,Roma,Lazio
+58005,Anguillara Sabazia,Roma,Lazio
+59001,Acquafondata,Frosinone,Lazio
+59002,Acuto,Frosinone,Lazio
+59003,Alatri,Frosinone,Lazio
+59004,Alvito,Frosinone,Lazio
+59005,Amaseno,Frosinone,Lazio
+60001,Aprilia,Latina,Lazio
+60002,Bassiano,Latina,Lazio
+60003,Campodimele,Latina,Lazio
+60004,Castelforte,Latina,Lazio
+60005,Cisterna di Latina,Latina,Lazio
+61001,Accumoli,Viterbo,Lazio
+61002,Acquapendente,Viterbo,Lazio
+61003,Arlena di Castro,Viterbo,Lazio
+61004,Bagnoregio,Viterbo,Lazio
+61005,Barbarano Romano,Viterbo,Lazio
+64001,Alba Adriatica,Teramo,Abruzzo
+64002,Ancarano,Teramo,Abruzzo
+64003,Arsita,Teramo,Abruzzo
+64004,Atri,Teramo,Abruzzo
+64005,Basciano,Teramo,Abruzzo
+65001,Abbateggio,Pescara,Abruzzo
+65002,Alanno,Pescara,Abruzzo
+65003,Bolognano,Pescara,Abruzzo
+65004,Brittoli,Pescara,Abruzzo
+65005,Bussi sul Tirino,Pescara,Abruzzo
+66001,Altino,Chieti,Abruzzo
+66002,Archi,Chieti,Abruzzo
+66003,Ari,Chieti,Abruzzo
+66004,Arielli,Chieti,Abruzzo
+66005,Atessa,Chieti,Abruzzo
+67001,Acciano,L'Aquila,Abruzzo
+67002,Aielli,L'Aquila,Abruzzo
+67003,Alfedena,L'Aquila,Abruzzo
+67004,Anversa degli Abruzzi,L'Aquila,Abruzzo
+67005,Ateleta,L'Aquila,Abruzzo
+68001,Acquaviva Collecroce,Campobasso,Molise
+68002,Baranello,Campobasso,Molise
+68003,Bojano,Campobasso,Molise
+68004,Bonefro,Campobasso,Molise
+68005,Busso,Campobasso,Molise
+69001,Agnone,Isernia,Molise
+69002,Bagnoli del Trigno,Isernia,Molise
+69003,Cantalupo nel Sannio,Isernia,Molise
+69004,Capracotta,Isernia,Molise
+69005,Carovilli,Isernia,Molise
+70001,Accadia,Foggia,Puglia
+70002,Alberona,Foggia,Puglia
+70003,Anzano di Puglia,Foggia,Puglia
+70004,Apricena,Foggia,Puglia
+70005,Ascoli Satriano,Foggia,Puglia
+71001,Acquaviva delle Fonti,Bari,Puglia
+71002,Adelfia,Bari,Puglia
+71003,Alberobello,Bari,Puglia
+71004,Altamura,Bari,Puglia
+71005,Bari,Bari,Puglia
+72001,Avetrana,Taranto,Puglia
+72002,Carosino,Taranto,Puglia
+72003,Castellaneta,Taranto,Puglia
+72004,Crispiano,Taranto,Puglia
+72005,Faggiano,Taranto,Puglia
+73001,Alessano,Lecce,Puglia
+73002,Alezio,Lecce,Puglia
+73003,Alliste,Lecce,Puglia
+73004,Andrano,Lecce,Puglia
+73005,Aradeo,Lecce,Puglia
+74001,Andria,Barletta-Andria-Trani,Puglia
+74002,Barletta,Barletta-Andria-Trani,Puglia
+74003,Bisceglie,Barletta-Andria-Trani,Puglia
+74004,Canosa di Puglia,Barletta-Andria-Trani,Puglia
+74005,Margherita di Savoia,Barletta-Andria-Trani,Puglia
+75001,Abriola,Potenza,Basilicata
+75002,Acerenza,Potenza,Basilicata
+75003,Albano di Lucania,Potenza,Basilicata
+75004,Anzi,Potenza,Basilicata
+75005,Armento,Potenza,Basilicata
+76001,Accettura,Matera,Basilicata
+76002,Aliano,Matera,Basilicata
+76003,Bernalda,Matera,Basilicata
+76004,Calciano,Matera,Basilicata
+76005,Cirigliano,Matera,Basilicata
+77001,Acquaformosa,Cosenza,Calabria
+77002,Acquappesa,Cosenza,Calabria
+77003,Acri,Cosenza,Calabria
+77004,Aiello Calabro,Cosenza,Calabria
+77005,Aieta,Cosenza,Calabria
+78001,Antonimina,Reggio Calabria,Calabria
+78002,Ardore,Reggio Calabria,Calabria
+78003,Africo,Reggio Calabria,Calabria
+78004,Agnana Calabra,Reggio Calabria,Calabria
+78005,Anoia,Reggio Calabria,Calabria
+79001,Albi,Catanzaro,Calabria
+79002,Amaroni,Catanzaro,Calabria
+79003,Amato,Catanzaro,Calabria
+79004,Andali,Catanzaro,Calabria
+79005,Argusto,Catanzaro,Calabria
+80001,Arena,Vibo Valentia,Calabria
+80002,Briatico,Vibo Valentia,Calabria
+80003,Brognaturo,Vibo Valentia,Calabria
+80004,Capistrano,Vibo Valentia,Calabria
+80005,Cessaniti,Vibo Valentia,Calabria
+81001,Acri,Crotone,Calabria
+81002,Belvedere di Spinello,Crotone,Calabria
+81003,Caccuri,Crotone,Calabria
+81004,Carfizzi,Crotone,Calabria
+81005,Casabona,Crotone,Calabria
+82001,Aci Castello,Catania,Sicilia
+82002,Aci Catena,Catania,Sicilia
+82003,Aci Sant'Antonio,Catania,Sicilia
+82004,Acireale,Catania,Sicilia
+82005,Adrano,Catania,Sicilia
+83001,Agrigento,Agrigento,Sicilia
+83002,Alessandria della Rocca,Agrigento,Sicilia
+83003,Aragona,Agrigento,Sicilia
+83004,Bivona,Agrigento,Sicilia
+83005,Burgio,Agrigento,Sicilia
+84001,Alcamo,Trapani,Sicilia
+84002,Buseto Palizzolo,Trapani,Sicilia
+84003,Calatafimi-Segesta,Trapani,Sicilia
+84004,Campobello di Mazara,Trapani,Sicilia
+84005,Castellammare del Golfo,Trapani,Sicilia
+85001,Acquedolci,Messina,Sicilia
+85002,Alcara Li Fusi,Messina,Sicilia
+85003,Alì,Messina,Sicilia
+85004,Alì Terme,Messina,Sicilia
+85005,Antillo,Messina,Sicilia
+86001,Assoro,Enna,Sicilia
+86002,Barrafranca,Enna,Sicilia
+86003,Calascibetta,Enna,Sicilia
+86004,Catenanuova,Enna,Sicilia
+86005,Centuripe,Enna,Sicilia
+87001,Augusta,Siracusa,Sicilia
+87002,Avola,Siracusa,Sicilia
+87003,Buccheri,Siracusa,Sicilia
+87004,Buscemi,Siracusa,Sicilia
+87005,Canicattini Bagni,Siracusa,Sicilia
+88001,Caltanissetta,Caltanissetta,Sicilia
+88002,Acquaviva Platani,Caltanissetta,Sicilia
+88003,Bompensiere,Caltanissetta,Sicilia
+88004,Butera,Caltanissetta,Sicilia
+88005,Campofranco,Caltanissetta,Sicilia
+89001,Assemini,Cagliari,Sardegna
+89002,Cagliari,Cagliari,Sardegna
+89003,Capoterra,Cagliari,Sardegna
+89004,Decimomannu,Cagliari,Sardegna
+89005,Dolianova,Cagliari,Sardegna
+90001,Alghero,Sassari,Sardegna
+90002,Anela,Sassari,Sardegna
+90003,Ardara,Sassari,Sardegna
+90004,Banari,Sassari,Sardegna
+90005,Benetutti,Sassari,Sardegna
+91001,Aritzo,Nuoro,Sardegna
+91002,Atzara,Nuoro,Sardegna
+91003,Austis,Nuoro,Sardegna
+91004,Belvì,Nuoro,Sardegna
+91005,Birori,Nuoro,Sardegna
+92001,Ales,Oristano,Sardegna
+92002,Allai,Oristano,Sardegna
+92003,Arborea,Oristano,Sardegna
+92004,Ardauli,Oristano,Sardegna
+92005,Assolo,Oristano,Sardegna
+93001,Arbus,Medio Campidano,Sardegna
+93002,Barumini,Medio Campidano,Sardegna
+93003,Collinas,Medio Campidano,Sardegna
+93004,Furtei,Medio Campidano,Sardegna
+93005,Genuri,Medio Campidano,Sardegna
+94001,Arzachena,Olbia-Tempio,Sardegna
+94002,Buddusò,Olbia-Tempio,Sardegna
+94003,Budoni,Olbia-Tempio,Sardegna
+94004,Calangianus,Olbia-Tempio,Sardegna
+94005,Golfo Aranci,Olbia-Tempio,Sardegna
+95001,Arzana,Ogliastra,Sardegna
+95002,Bari Sardo,Ogliastra,Sardegna
+95003,Baunei,Ogliastra,Sardegna
+95004,Cardedu,Ogliastra,Sardegna
+95005,Elini,Ogliastra,Sardegna
+96001,Iglesias,Carbonia-Iglesias,Sardegna
+96002,Buggerru,Carbonia-Iglesias,Sardegna
+96003,Calasetta,Carbonia-Iglesias,Sardegna
+96004,Carbonia,Carbonia-Iglesias,Sardegna
+96005,Carloforte,Carbonia-Iglesias,Sardegna

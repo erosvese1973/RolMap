@@ -108,23 +108,29 @@ SAMPLE_CSV_DATA = """codice,comune,provincia,regione
 
 def load_comuni_data():
     """
-    Load Italian municipalities data from CSV file or create a sample if file doesn't exist.
+    Load Italian municipalities data from CSV file.
     Returns a pandas DataFrame with the data.
     """
     try:
-        csv_path = os.path.join('static', 'data', 'elenco_comuni.csv')
+        # Try to load from the complete list first
+        csv_path_completo = os.path.join('static', 'data', 'elenco_comuni_completo.csv')
+        csv_path_base = os.path.join('static', 'data', 'elenco_comuni.csv')
         
-        # Check if the file exists
-        if os.path.exists(csv_path):
-            logger.info(f"Loading comuni data from {csv_path}")
-            df = pd.read_csv(csv_path)
+        # Check if the complete file exists
+        if os.path.exists(csv_path_completo):
+            logger.info(f"Loading comuni data from {csv_path_completo}")
+            df = pd.read_csv(csv_path_completo)
+        # Otherwise check if the base file exists
+        elif os.path.exists(csv_path_base):
+            logger.info(f"Loading comuni data from {csv_path_base}")
+            df = pd.read_csv(csv_path_base)
         else:
-            # If the file doesn't exist, create the directory and write sample data
-            logger.warning(f"CSV file not found at {csv_path}, using sample data")
-            os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+            # If no file exists, create the directory and write sample data
+            logger.warning(f"CSV files not found, using sample data")
+            os.makedirs(os.path.dirname(csv_path_base), exist_ok=True)
             
             # Write sample data to CSV file
-            with open(csv_path, 'w') as f:
+            with open(csv_path_base, 'w') as f:
                 f.write(SAMPLE_CSV_DATA)
             
             # Load the sample data
