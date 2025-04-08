@@ -88,11 +88,11 @@
                         <!-- Pulsante Mappa -->
                         <div class="mt-3">
                             <button type="button" id="mapBtn" class="btn btn-primary" disabled>
-                                <i class="fas fa-map-marked-alt me-1"></i>
-                                Mappa
+                                <i class="fas fa-save me-1"></i><i class="fas fa-map-marked-alt me-1"></i>
+                                Salva e Visualizza
                             </button>
                             <small class="text-muted ms-2">
-                                Visualizza i comuni selezionati sulla mappa
+                                Salva i dati e visualizza i comuni selezionati sulla mappa
                             </small>
                         </div>
                     </div>
@@ -596,10 +596,71 @@ document.addEventListener('DOMContentLoaded', function() {
         const agentId = agentSelect.value;
         const agentName = agentNameInput.value;
         const agentColor = agentColorInput.value;
+        const agentPhone = agentPhoneInput.value;
+        const agentEmail = agentEmailInput.value;
         
         // Costruisci la lista dei comuni selezionati
         const comuniIds = Array.from(selectedComuniMap.keys());
         
+        // Se l'agente esiste già o è nuovo ma valido, salviamo prima i dati
+        if (agentId && agentName.trim() !== '') {
+            // Prima salviamo i dati dell'agente e i suoi comuni
+            console.log("Salvataggio agente e comuni prima di visualizzare la mappa...");
+            
+            const formData = new FormData();
+            formData.append('agent_name', agentName);
+            formData.append('agent_color', agentColor);
+            formData.append('agent_phone', agentPhone);
+            formData.append('agent_email', agentEmail);
+            
+            // Se l'agente esiste già, inviamo il suo ID
+            if (agentId !== 'new') {
+                formData.append('agent_id', agentId);
+            }
+            
+            // Aggiungiamo tutti i comuni selezionati
+            comuniIds.forEach(id => {
+                formData.append('comuni', id);
+            });
+            
+            // Aggiungiamo un timestamp per evitare il caching
+            const saveTimestamp = new Date().getTime();
+            fetch('{{ url_for("submit") }}?_=' + saveTimestamp, {
+                method: 'POST',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Risposta server non valida');
+                }
+                return response.text();
+            })
+            .then(() => {
+                showToast('Dati salvati, apertura mappa...', 'success');
+                
+                // Ora procediamo con la visualizzazione della mappa
+                visualizzaMappa(agentId, agentName, agentColor, comuniIds);
+            })
+            .catch(error => {
+                console.error('Errore durante il salvataggio:', error);
+                showToast('Errore durante il salvataggio. Prova a visualizzare comunque la mappa.', 'warning');
+                
+                // Proviamo comunque a visualizzare la mappa anche se il salvataggio fallisce
+                visualizzaMappa(agentId, agentName, agentColor, comuniIds);
+            });
+        } else {
+            // Per agenti non salvati/temporanei, visualizziamo solo la mappa senza salvare
+            visualizzaMappa(agentId, agentName, agentColor, comuniIds);
+        }
+    });
+    
+    // Funzione per visualizzare la mappa
+    function visualizzaMappa(agentId, agentName, agentColor, comuniIds) {
         // Crea una form temporanea per inviare i dati
         const tempForm = document.createElement('form');
         tempForm.method = 'POST';
@@ -628,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.appendChild(tempForm);
         tempForm.submit();
         document.body.removeChild(tempForm);
-    });
+    }
     
     // Initialize display
     updateSelectedComuniDisplay();
