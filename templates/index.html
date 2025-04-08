@@ -127,7 +127,48 @@ document.addEventListener('DOMContentLoaded', function() {
         if (editAgentId) {
             console.log("Preselected agent ID:", editAgentId);
             
-            // Trigger the change event to load agent data
+            // Carica direttamente i comuni senza aspettare l'evento change
+            // Questo risolve il problema della mancata visualizzazione dei comuni selezionati
+            if (editAgentId !== 'new') {
+                // Fetch agent's assigned comuni - aggiungiamo un timestamp per evitare la cache
+                const agentTimestamp = new Date().getTime();
+                fetch('{{ url_for("get_agent_comuni") }}?_=' + agentTimestamp, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    },
+                    body: 'agent_id=' + encodeURIComponent(editAgentId)
+                })
+                .then(response => response.json())
+                .then(comuni => {
+                    console.log("Loaded " + comuni.length + " comuni for agent ID: " + editAgentId);
+                    
+                    // Clear current selection
+                    selectedComuniMap.clear();
+                    
+                    // Add agent's comuni to selection
+                    comuni.forEach(comune => {
+                        selectedComuniMap.set(comune.id, {
+                            id: comune.id,
+                            name: comune.name,
+                            province: comune.province,
+                            region: comune.region
+                        });
+                    });
+                    
+                    // Update display
+                    updateSelectedComuniDisplay();
+                })
+                .catch(error => {
+                    console.error('Error fetching agent comuni:', error);
+                    showToast('Errore nel caricamento dei comuni dell\'agente', 'danger');
+                });
+            }
+            
+            // Trigger the change event to load agent data (mantenuto per retrocompatibilità)
             const changeEvent = new Event('change');
             agentSelect.dispatchEvent(changeEvent);
             
