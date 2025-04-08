@@ -105,6 +105,13 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
         console.log("Initializing map with comune_ids:", comune_ids);
         
+        // Verifichiamo che il div della mappa esista
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+            console.error("Elemento mappa non trovato!");
+            return;
+        }
+        
         // Creiamo un elemento di testo per mostrare lo stato di caricamento
         const loadingElement = document.createElement('div');
         loadingElement.style.position = 'absolute';
@@ -116,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loadingElement.style.padding = '10px';
         loadingElement.style.borderRadius = '5px';
         loadingElement.textContent = 'Caricamento mappa in corso...';
-        document.getElementById('map').appendChild(loadingElement);
+        mapElement.appendChild(loadingElement);
         
         // Configurazione semplificata della mappa di base
         map = L.map('map');
@@ -227,16 +234,19 @@ function fetchGeoJSON() {
         // Verifica che geojson abbia le features
         if (!geojson || !geojson.features || geojson.features.length === 0) {
             console.error("GeoJSON response does not contain features:", geojson);
-            const errorElement = document.createElement('div');
-            errorElement.style.position = 'absolute';
-            errorElement.style.top = '40px';
-            errorElement.style.right = '10px';
-            errorElement.style.zIndex = '9999';
-            errorElement.style.backgroundColor = 'white';
-            errorElement.style.padding = '5px';
-            errorElement.style.color = 'red';
-            errorElement.textContent = 'Errore: Nessun dato GeoJSON valido ricevuto';
-            document.getElementById('map').appendChild(errorElement);
+            const mapElement = document.getElementById('map');
+            if (mapElement) {
+                const errorElement = document.createElement('div');
+                errorElement.style.position = 'absolute';
+                errorElement.style.top = '40px';
+                errorElement.style.right = '10px';
+                errorElement.style.zIndex = '9999';
+                errorElement.style.backgroundColor = 'white';
+                errorElement.style.padding = '5px';
+                errorElement.style.color = 'red';
+                errorElement.textContent = 'Errore: Nessun dato GeoJSON valido ricevuto';
+                mapElement.appendChild(errorElement);
+            }
             return;
         }
         
@@ -249,28 +259,7 @@ function fetchGeoJSON() {
         
         if (fallbackFeatures.length > 0) {
             console.warn(`Found ${fallbackFeatures.length} fallback polygons`);
-            
-            // Mostra il box di debug con i comuni che hanno poligoni di fallback
-            const debugBox = document.getElementById('debug-fallback-polygons');
-            const polygonList = document.getElementById('fallback-polygon-list');
-            
-            // Svuota la lista
-            polygonList.innerHTML = '';
-            
-            // Aggiungi ogni comune alla lista
-            fallbackFeatures.forEach(feature => {
-                const props = feature.properties;
-                const id = props.id || 'Unknown';
-                const name = props.name || `Comune ${id}`;
-                
-                const listItem = document.createElement('div');
-                listItem.classList.add('mb-1');
-                listItem.innerHTML = `<strong>${name}</strong> (ID: ${id})`;
-                polygonList.appendChild(listItem);
-            });
-            
-            // Mostra il box di debug
-            debugBox.style.display = 'block';
+            // Non mostriamo più il box di debug dei poligoni di fallback
         }
         
         // Add the GeoJSON data to the map
@@ -332,30 +321,36 @@ function fetchGeoJSON() {
             }
         } catch (err) {
             console.error("Error rendering GeoJSON:", err);
+            const mapElement = document.getElementById('map');
+            if (mapElement) {
+                const errorElement = document.createElement('div');
+                errorElement.style.position = 'absolute';
+                errorElement.style.top = '70px';
+                errorElement.style.right = '10px';
+                errorElement.style.zIndex = '9999';
+                errorElement.style.backgroundColor = 'white';
+                errorElement.style.padding = '5px';
+                errorElement.style.color = 'red';
+                errorElement.textContent = `Errore durante il rendering: ${err.message}`;
+                mapElement.appendChild(errorElement);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error fetching or processing GeoJSON:', error);
+        const mapElement = document.getElementById('map');
+        if (mapElement) {
             const errorElement = document.createElement('div');
             errorElement.style.position = 'absolute';
-            errorElement.style.top = '70px';
+            errorElement.style.top = '100px';
             errorElement.style.right = '10px';
             errorElement.style.zIndex = '9999';
             errorElement.style.backgroundColor = 'white';
             errorElement.style.padding = '5px';
             errorElement.style.color = 'red';
-            errorElement.textContent = `Errore durante il rendering: ${err.message}`;
-            document.getElementById('map').appendChild(errorElement);
+            errorElement.textContent = `Errore di connessione: ${error.message}`;
+            mapElement.appendChild(errorElement);
         }
-    })
-    .catch(error => {
-        console.error('Error fetching or processing GeoJSON:', error);
-        const errorElement = document.createElement('div');
-        errorElement.style.position = 'absolute';
-        errorElement.style.top = '100px';
-        errorElement.style.right = '10px';
-        errorElement.style.zIndex = '9999';
-        errorElement.style.backgroundColor = 'white';
-        errorElement.style.padding = '5px';
-        errorElement.style.color = 'red';
-        errorElement.textContent = `Errore di connessione: ${error.message}`;
-        document.getElementById('map').appendChild(errorElement);
     });
 }
 </script>
