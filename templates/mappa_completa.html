@@ -10,8 +10,12 @@
                 <div class="card-body">
                     <h2 class="mb-4">Mappa Completa di Tutti i Territori</h2>
                     
-                    <div class="row mb-4">
-                        <div class="col-md-12">
+                    <div class="map-container mb-4">
+                        <div id="map"></div>
+                    </div>
+                    
+                    <div class="card border-0 shadow-sm mt-4">
+                        <div class="card-body">
                             <div class="mb-3">
                                 <h5 class="mb-0">Legenda Agenti</h5>
                             </div>
@@ -27,10 +31,6 @@
                                 {% endfor %}
                             </div>
                         </div>
-                    </div>
-
-                    <div class="map-container">
-                        <div id="map"></div>
                     </div>
                 </div>
             </div>
