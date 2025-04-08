@@ -51,7 +51,7 @@
                         <i class="fas fa-map me-2"></i>
                         Territori Assegnati
                     </h4>
-                    <a href="{{ url_for('index') }}" class="btn btn-light btn-sm">
+                    <a href="{{ url_for('assegnazione') }}" class="btn btn-light btn-sm">
                         <i class="fas fa-arrow-left me-1"></i>
                         Torna alla selezione
                     </a>
@@ -61,6 +61,17 @@
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
                     <strong>Agente:</strong> {{ agent_name }}
+                </div>
+                
+                <h5 class="mb-3">Mappa territori</h5>
+                <div class="map-container mb-4">
+                    <div id="map"></div>
+                    <div class="map-overlay">
+                        <h6>{{ agent_name }}</h6>
+                        <p class="mb-0">
+                            <small>{{ comuni|length }} comuni assegnati</small>
+                        </p>
+                    </div>
                 </div>
                 
                 <h5 class="mb-3">Comuni selezionati ({{ comuni|length }})</h5>
@@ -74,17 +85,6 @@
                             </div>
                         </div>
                         {% endfor %}
-                    </div>
-                </div>
-
-                <h5 class="mb-3">Mappa territori</h5>
-                <div class="map-container">
-                    <div id="map"></div>
-                    <div class="map-overlay">
-                        <h6>{{ agent_name }}</h6>
-                        <p class="mb-0">
-                            <small>{{ comuni|length }} comuni assegnati</small>
-                        </p>
                     </div>
                 </div>
                 
