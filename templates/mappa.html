@@ -87,6 +87,18 @@
                         </p>
                     </div>
                 </div>
+                
+                <!-- Area debug per poligoni non trovati -->
+                <div id="debug-fallback-polygons" class="mt-3 p-2 border border-warning rounded bg-warning bg-opacity-10" style="display: none;">
+                    <h6 class="text-warning mb-2">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Avviso: Poligoni non trovati
+                    </h6>
+                    <p class="small text-muted mb-1">Per i seguenti comuni non sono stati trovati i confini esatti e sono stati generati dei poligoni approssimativi:</p>
+                    <div id="fallback-polygon-list" class="ps-3 small">
+                        <!-- La lista dei comuni con poligoni di fallback sarà inserita qui -->
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -248,6 +260,37 @@ function fetchGeoJSON() {
         
         console.log(`Received ${geojson.features.length} features in GeoJSON response`);
         
+        // Controlla se ci sono poligoni di fallback
+        const fallbackFeatures = geojson.features.filter(feature => 
+            feature.properties && feature.properties.is_fallback === true
+        );
+        
+        if (fallbackFeatures.length > 0) {
+            console.warn(`Found ${fallbackFeatures.length} fallback polygons`);
+            
+            // Mostra il box di debug con i comuni che hanno poligoni di fallback
+            const debugBox = document.getElementById('debug-fallback-polygons');
+            const polygonList = document.getElementById('fallback-polygon-list');
+            
+            // Svuota la lista
+            polygonList.innerHTML = '';
+            
+            // Aggiungi ogni comune alla lista
+            fallbackFeatures.forEach(feature => {
+                const props = feature.properties;
+                const id = props.id || 'Unknown';
+                const name = props.name || `Comune ${id}`;
+                
+                const listItem = document.createElement('div');
+                listItem.classList.add('mb-1');
+                listItem.innerHTML = `<strong>${name}</strong> (ID: ${id})`;
+                polygonList.appendChild(listItem);
+            });
+            
+            // Mostra il box di debug
+            debugBox.style.display = 'block';
+        }
+        
         // Add the GeoJSON data to the map
         try {
             const geoJsonLayer = L.geoJSON(geojson, {
@@ -271,14 +314,36 @@ function fetchGeoJSON() {
                         const props = feature.properties;
                         const id = props.id || 'Unknown';
                         const name = props.name || `Comune ${id}`;
+                        const isFallback = props.is_fallback === true;
                         
-                        layer.bindPopup(`
+                        // Se è un poligono di fallback, aggiungiamo uno stile tratteggiato
+                        if (isFallback) {
+                            layer.setStyle({
+                                dashArray: '5, 5',
+                                fillOpacity: 0.5  // Opacità ridotta per indicare che è approssimativo
+                            });
+                        }
+                        
+                        let popupContent = `
                             <div>
                                 <h6>${name}</h6>
                                 <p>Codice: ${id}</p>
                                 <p>Agente: {{ agent_name }}</p>
-                            </div>
-                        `);
+                            `;
+                            
+                        // Aggiungi un avviso se è un poligono di fallback
+                        if (isFallback) {
+                            popupContent += `
+                                <p class="text-warning" style="font-size: 0.8em; margin-top: 5px;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Confini approssimativi (dati non disponibili)
+                                </p>
+                            `;
+                        }
+                        
+                        popupContent += `</div>`;
+                        
+                        layer.bindPopup(popupContent);
                     }
                 }
             });

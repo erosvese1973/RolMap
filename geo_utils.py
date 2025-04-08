@@ -224,7 +224,8 @@ def _generate_fallback_geojson(comune_ids):
             "type": "Feature",
             "properties": {
                 "id": normalized_id,
-                "name": f"Comune {normalized_id}"
+                "name": f"Comune {normalized_id}",
+                "is_fallback": True  # Flag per identificare i poligoni generati artificialmente
             },
             "geometry": {
                 "type": "Polygon",
