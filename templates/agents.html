@@ -36,7 +36,6 @@
                             <tr>
                                 <th scope="col">Nome Agente</th>
                                 <th scope="col">Contatti</th>
-                                <th scope="col">Data Registrazione</th>
                                 <th scope="col">Comuni Assegnati</th>
                                 <th scope="col">Azioni</th>
                             </tr>
@@ -72,7 +71,7 @@
                                         {% endif %}
                                     </div>
                                 </td>
-                                <td>{{ agent.registration_date.strftime('%d/%m/%Y %H:%M') }}</td>
+
                                 <td>
                                     <span class="badge bg-primary">{{ agent.comuni|length }}</span>
                                     <button class="btn btn-sm btn-link" type="button" 
