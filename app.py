@@ -83,6 +83,8 @@ def get_comuni():
     # Get list of all assigned comuni
     assigned_comuni = []
     try:
+        # Execute a fresh query to ensure we have the latest data
+        db.session.expire_all()  # Expire cached objects to force a fresh load
         assigned_comuni = [a.comune_id for a in models.Assignment.query.all()]
     except Exception as e:
         logger.error(f"Error getting assigned comuni: {str(e)}")
@@ -416,11 +418,20 @@ def delete_agent(agent_id):
             flash('Agente non trovato', 'danger')
             return redirect(url_for('list_agents'))
         
+        # Registra il nome dell'agente prima di eliminarlo
+        agent_name = agent.name
+        
         # Delete agent and all assignments (cascade delete)
         db.session.delete(agent)
         db.session.commit()
         
-        flash(f'Agente {agent.name} eliminato con successo', 'success')
+        # Pulizia esplicita della cache delle sessioni per assicurarsi che i dati siano aggiornati
+        db.session.expire_all()
+        
+        # Invalida la cache anche per le richieste future
+        db.session.close()
+        
+        flash(f'Agente {agent_name} eliminato con successo', 'success')
         return redirect(url_for('list_agents'))
     except Exception as e:
         db.session.rollback()
