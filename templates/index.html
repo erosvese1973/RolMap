@@ -97,12 +97,7 @@
                         </div>
                     </div>
 
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="button" id="resetBtn" class="btn btn-secondary">
-                            <i class="fas fa-undo me-1"></i>
-                            Reset
-                        </button>
-                    </div>
+                    <!-- Pulsante Reset rimosso come richiesto -->
                 </form>
             </div>
         </div>
@@ -124,7 +119,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const selectedComuniContainer = document.getElementById('selectedComuni');
     const noComuniMessage = document.getElementById('noComuniMessage');
 
-    const resetBtn = document.getElementById('resetBtn');
     const selectionForm = document.getElementById('selectionForm');
     
     // Selected comuni storage
@@ -569,20 +563,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Reset button handler
-    resetBtn.addEventListener('click', function() {
-        selectedComuniMap.clear();
-        updateSelectedComuniDisplay();
-        
-        // Reset form fields
-        regionSelect.value = '';
-        provinceSelect.innerHTML = '<option value="">Seleziona prima una regione</option>';
-        provinceSelect.disabled = true;
-        comuniSelect.innerHTML = '<option value="">Seleziona prima una provincia</option>';
-        comuniSelect.disabled = true;
-        
-        document.getElementById('agent_name').value = '';
-    });
+    // Gestore pulsante Reset rimosso come richiesto
     
     // Map button handler
     const mapBtn = document.getElementById('mapBtn');
