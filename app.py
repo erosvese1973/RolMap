@@ -51,7 +51,7 @@ with app.app_context():
 @app.route('/')
 def index():
     """Home page with complete map visualization of all territories"""
-    return redirect(url_for('list_agents'))
+    return redirect(url_for('mappa_completa'))
 
 @app.route('/assegnazione')
 def assegnazione():
