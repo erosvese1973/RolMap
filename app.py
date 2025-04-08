@@ -110,6 +110,42 @@ def submit():
         # Check if agent already exists
         existing_agent = models.Agent.query.filter_by(name=agent_name).first()
         
+        # First, process all inputs to validate them BEFORE any database changes
+        valid_comune_ids = []
+        invalid_comuni = []
+        
+        for comune_id in comune_ids:
+            # Check if the comune is valid
+            comune_data = comuni_data[comuni_data['codice'] == comune_id]
+            if comune_data.empty:
+                continue
+                
+            # Check if comune is already assigned to another agent
+            existing_assignment = models.Assignment.query.filter_by(comune_id=comune_id).first()
+            
+            if existing_agent and existing_assignment and existing_assignment.agent_id == existing_agent.id:
+                # Already assigned to this agent - keep it
+                valid_comune_ids.append(comune_id) 
+            elif existing_assignment:
+                # Assigned to another agent - not valid
+                comune_name = comune_data.iloc[0]['comune']
+                other_agent = models.Agent.query.get(existing_assignment.agent_id)
+                other_agent_name = other_agent.name if other_agent else "un altro agente"
+                invalid_comuni.append(f'{comune_name} (già assegnato a {other_agent_name})')
+            else:
+                # Not assigned to anyone - valid
+                valid_comune_ids.append(comune_id)
+                
+        # If there are invalid comuni, alert the user but don't stop the process for valid ones
+        if invalid_comuni:
+            invalid_list = ", ".join(invalid_comuni)
+            flash(f'Comuni non assegnabili: {invalid_list}', 'warning')
+            
+            # If no valid comuni are left, stop the process
+            if not valid_comune_ids:
+                flash('Nessun comune valido da assegnare', 'danger')
+                return redirect(url_for('index'))
+        
         if existing_agent:
             # Update existing agent's municipalities
             existing_agent.registration_date = datetime.now()
@@ -117,24 +153,14 @@ def submit():
             # Get existing comune assignments for this agent
             existing_comuni_ids = [assignment.comune_id for assignment in existing_agent.assignments]
             
+            # Remove assignments that are no longer selected
+            for assignment in list(existing_agent.assignments):
+                if assignment.comune_id not in valid_comune_ids:
+                    db.session.delete(assignment)
+            
             # Add new comune assignments
-            for comune_id in comune_ids:
+            for comune_id in valid_comune_ids:
                 if comune_id not in existing_comuni_ids:
-                    # Validate comune_id exists in our data
-                    comune_data = comuni_data[comuni_data['codice'] == comune_id]
-                    if comune_data.empty:
-                        continue
-                    
-                    # Check if the comune is already assigned to another agent
-                    existing_assignment = models.Assignment.query.filter_by(comune_id=comune_id).first()
-                    if existing_assignment and existing_assignment.agent_id != existing_agent.id:
-                        comune_name = comune_data.iloc[0]['comune']
-                        # Get the agent name who has this comune
-                        other_agent = models.Agent.query.get(existing_assignment.agent_id)
-                        other_agent_name = other_agent.name if other_agent else "un altro agente"
-                        flash(f'Il comune {comune_name} è già assegnato a {other_agent_name}. Riassegnazione non possibile.', 'warning')
-                        continue
-                    
                     new_assignment = models.Assignment(
                         agent_id=existing_agent.id,
                         comune_id=comune_id
@@ -153,22 +179,7 @@ def submit():
             db.session.flush()  # Get the ID of the new agent
             
             # Add comune assignments
-            for comune_id in comune_ids:
-                # Validate comune_id exists in our data
-                comune_data = comuni_data[comuni_data['codice'] == comune_id]
-                if comune_data.empty:
-                    continue
-                
-                # Check if the comune is already assigned to another agent
-                existing_assignment = models.Assignment.query.filter_by(comune_id=comune_id).first()
-                if existing_assignment:
-                    comune_name = comune_data.iloc[0]['comune']
-                    # Get the agent name who has this comune
-                    other_agent = models.Agent.query.get(existing_assignment.agent_id)
-                    other_agent_name = other_agent.name if other_agent else "un altro agente"
-                    flash(f'Il comune {comune_name} è già assegnato a {other_agent_name}. Riassegnazione non possibile.', 'warning')
-                    continue
-                
+            for comune_id in valid_comune_ids:
                 new_assignment = models.Assignment(
                     agent_id=new_agent.id,
                     comune_id=comune_id
