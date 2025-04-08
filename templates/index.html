@@ -71,7 +71,13 @@
 
                     <!-- Selected Comuni List -->
                     <div class="mb-4">
-                        <label class="form-label">Comuni Selezionati</label>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Comuni Selezionati</label>
+                            <button type="button" id="clearComuniBtn" class="btn btn-sm btn-outline-danger" disabled>
+                                <i class="fas fa-trash-alt me-1"></i>
+                                Cancella Tutti
+                            </button>
+                        </div>
                         <div id="selectedComuniContainer" class="border rounded p-3 min-height-100">
                             <p id="noComuniMessage" class="text-muted">Nessun comune selezionato</p>
                             <div id="selectedComuni" class="d-flex flex-wrap gap-2">
@@ -258,11 +264,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Add newly selected comuni
+        // Add newly selected comuni, ensuring no duplicates
         Array.from(this.selectedOptions).forEach(option => {
-            if (!selectedComuniMap.has(option.value)) {
-                selectedComuniMap.set(option.value, {
-                    id: option.value,
+            // Check if this comune is already assigned to another agent
+            const comuneId = option.value;
+            
+            // If comune not already in the map, add it
+            if (!selectedComuniMap.has(comuneId)) {
+                selectedComuniMap.set(comuneId, {
+                    id: comuneId,
                     name: option.textContent,
                     province: provinceSelect.value,
                     region: regionSelect.value
@@ -274,6 +284,23 @@ document.addEventListener('DOMContentLoaded', function() {
         updateSelectedComuniDisplay();
     });
     
+    // Clear Comuni button
+    const clearComuniBtn = document.getElementById('clearComuniBtn');
+    clearComuniBtn.addEventListener('click', function() {
+        // Confirm before clearing
+        if (confirm('Sei sicuro di voler cancellare tutti i comuni selezionati?')) {
+            selectedComuniMap.clear();
+            updateSelectedComuniDisplay();
+            
+            // Deselect all options in multi-select
+            if (!comuniSelect.disabled) {
+                Array.from(comuniSelect.options).forEach(option => {
+                    option.selected = false;
+                });
+            }
+        }
+    });
+    
     // Function to update the display of selected comuni
     function updateSelectedComuniDisplay() {
         // Clear current display
@@ -282,9 +309,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (selectedComuniMap.size === 0) {
             noComuniMessage.style.display = 'block';
             submitBtn.disabled = true;
+            clearComuniBtn.disabled = true;
         } else {
             noComuniMessage.style.display = 'none';
             submitBtn.disabled = false;
+            clearComuniBtn.disabled = false;
             
             // Add each selected comune as a badge
             selectedComuniMap.forEach(comune => {
