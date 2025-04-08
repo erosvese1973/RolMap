@@ -130,4 +130,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Sync agent name between input fields and hidden fields
+    document.querySelectorAll('input[name="agent_name"]').forEach(nameInput => {
+        nameInput.addEventListener('input', function() {
+            const agentId = this.closest('form').action.split('/').pop();
+            // Update hidden field in the map form
+            const hiddenField = document.getElementById('map_agent_name_' + agentId);
+            if (hiddenField) {
+                hiddenField.value = this.value;
+            }
+        });
+    });
 });

@@ -639,19 +639,20 @@ def update_agent_contacts(agent_id):
         # Recupera i dati dal form
         agent_phone = request.form.get('agent_phone', '')
         agent_email = request.form.get('agent_email', '')
+        agent_name = request.form.get('agent_name', agent.name)  # Aggiungi supporto per il nome
         
         # Aggiorna i contatti dell'agente
         agent.phone = agent_phone
         agent.email = agent_email
+        agent.name = agent_name  # Aggiorna anche il nome
         
         # Salva le modifiche
         db.session.commit()
         
         # Invalida la cache per assicurarsi che i dati siano aggiornati
         db.session.expire_all()
-        db.session.close()
         
-        flash(f'Contatti per {agent.name} aggiornati con successo', 'success')
+        flash(f'Informazioni per {agent.name} aggiornate con successo', 'success')
         return redirect(url_for('list_agents'))
     except Exception as e:
         db.session.rollback()
@@ -679,7 +680,6 @@ def update_agent_color(agent_id):
         
         # Invalida la cache per assicurarsi che i dati siano aggiornati
         db.session.expire_all()
-        db.session.close()
         
         flash(f'Colore per {agent.name} aggiornato con successo', 'success')
         return redirect(url_for('list_agents'))

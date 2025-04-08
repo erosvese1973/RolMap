@@ -44,10 +44,17 @@
                             {% for agent in agents %}
                             <tr>
                                 <td>
-                                    <div class="d-flex align-items-center">
+                                    <form action="{{ url_for('update_agent_contacts', agent_id=agent.id) }}" method="post" class="d-flex align-items-center">
                                         <button type="button" class="color-circle-btn" data-bs-toggle="modal" data-bs-target="#editColorModal{{ agent.id }}" style="width: 20px; height: 20px; background-color: {{ agent.color }}; border-radius: 50%; margin-right: 10px; border: 1px solid #333; cursor: pointer;" title="Modifica colore"></button>
-                                        {{ agent.name }}
-                                    </div>
+                                        <div class="input-group input-group-sm me-2" style="max-width: 200px;">
+                                            <input type="text" class="form-control form-control-sm" 
+                                                  name="agent_name" value="{{ agent.name }}" 
+                                                  placeholder="Nome agente" aria-label="Nome agente">
+                                        </div>
+                                        <button type="submit" class="btn btn-sm btn-primary btn-sm">
+                                            <i class="fas fa-save"></i>
+                                        </button>
+                                    </form>
                                 </td>
                                 <td>
                                     <form action="{{ url_for('update_agent_contacts', agent_id=agent.id) }}" method="post" class="d-flex flex-column">
@@ -109,7 +116,7 @@
                                 <td>
                                     <div class="btn-group" role="group">
                                         <form action="{{ url_for('submit') }}" method="post">
-                                            <input type="hidden" name="agent_name" value="{{ agent.name }}">
+                                            <input type="hidden" name="agent_name" value="{{ agent.name }}" id="map_agent_name_{{ agent.id }}">
                                             {% for comune in agent.comuni %}
                                             <input type="hidden" name="comuni" value="{{ comune.id }}">
                                             {% endfor %}
