@@ -50,26 +50,37 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="d-flex flex-column mb-1">
-                                        {% if agent.phone %}
-                                        <div class="d-flex align-items-center mb-1">
-                                            <i class="fas fa-phone text-primary me-2"></i>
-                                            <span>{{ agent.phone }}</span>
-                                            <a href="https://wa.me/{{ agent.phone|replace(' ', '')|replace('+', '') }}" target="_blank" class="btn btn-sm btn-success ms-2" title="Contatta su WhatsApp">
+                                    <form action="{{ url_for('update_agent_contacts', agent_id=agent.id) }}" method="post" class="d-flex flex-column">
+                                        <div class="input-group input-group-sm mb-2">
+                                            <span class="input-group-text" id="phone-addon-{{ agent.id }}">
+                                                <i class="fas fa-phone"></i>
+                                            </span>
+                                            <input type="tel" class="form-control form-control-sm" 
+                                                  name="agent_phone" value="{{ agent.phone or '' }}" 
+                                                  placeholder="Es. +39 333 1234567" aria-label="Cellulare"
+                                                  aria-describedby="phone-addon-{{ agent.id }}">
+                                            {% if agent.phone %}
+                                            <a href="https://wa.me/{{ agent.phone|replace(' ', '')|replace('+', '') }}" 
+                                               target="_blank" class="btn btn-sm btn-success" title="Contatta su WhatsApp">
                                                 <i class="fab fa-whatsapp"></i>
                                             </a>
+                                            {% endif %}
                                         </div>
-                                        {% endif %}
-                                        {% if agent.email %}
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-envelope text-primary me-2"></i>
-                                            <a href="mailto:{{ agent.email }}">{{ agent.email }}</a>
+                                        
+                                        <div class="input-group input-group-sm mb-2">
+                                            <span class="input-group-text" id="email-addon-{{ agent.id }}">
+                                                <i class="fas fa-envelope"></i>
+                                            </span>
+                                            <input type="email" class="form-control form-control-sm" 
+                                                  name="agent_email" value="{{ agent.email or '' }}" 
+                                                  placeholder="email@esempio.com" aria-label="Email"
+                                                  aria-describedby="email-addon-{{ agent.id }}">
                                         </div>
-                                        {% endif %}
-                                        {% if not agent.phone and not agent.email %}
-                                        <span class="text-muted">Nessun contatto</span>
-                                        {% endif %}
-                                    </div>
+                                        
+                                        <button type="submit" class="btn btn-sm btn-primary align-self-end">
+                                            <i class="fas fa-save me-1"></i> Salva
+                                        </button>
+                                    </form>
                                 </td>
 
                                 <td>
@@ -107,10 +118,7 @@
                                                 Mappa
                                             </button>
                                         </form>
-                                        <button type="button" data-bs-toggle="modal" data-bs-target="#editContactModal{{ agent.id }}" class="btn btn-sm btn-secondary me-2">
-                                            <i class="fas fa-address-card me-1"></i>
-                                            Contatti
-                                        </button>
+
 
                                         <form action="{{ url_for('delete_agent', agent_id=agent.id) }}" method="post" 
                                               class="d-inline" onsubmit="return confirm('Sei sicuro di voler eliminare questo agente?');">
