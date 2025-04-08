@@ -106,6 +106,37 @@ def get_comuni():
     
     return jsonify(province_comuni)
 
+@app.route('/remove_comune', methods=['POST'])
+def remove_comune():
+    """Remove a single municipality from an agent's assignments"""
+    try:
+        agent_id = request.form.get('agent_id', type=int)
+        comune_id = request.form.get('comune_id')
+        
+        if not agent_id or not comune_id:
+            return jsonify({'success': False, 'error': 'Dati mancanti'}), 400
+        
+        # Elimina l'assegnazione se esiste
+        assignment = models.Assignment.query.filter_by(
+            agent_id=agent_id, 
+            comune_id=comune_id
+        ).first()
+        
+        if assignment:
+            logger.debug(f"Removing assignment: comune {comune_id} from agent {agent_id}")
+            db.session.delete(assignment)
+            db.session.commit()
+            db.session.expire_all()
+            db.session.close()
+            return jsonify({'success': True})
+        else:
+            return jsonify({'success': False, 'error': 'Assegnazione non trovata'}), 404
+    
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error removing comune: {str(e)}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/submit', methods=['POST'])
 def submit():
     """Process form submission for agent and selected municipalities"""

@@ -434,16 +434,67 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('#selectedComuni .btn-close').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const comuneId = this.dataset.id;
-                    selectedComuniMap.delete(comuneId);
-                    updateSelectedComuniDisplay();
+                    const selectedAgentId = agentSelect.value;
                     
-                    // Update selection in the select element if visible
-                    if (!comuniSelect.disabled) {
-                        Array.from(comuniSelect.options).forEach(option => {
-                            if (option.value === comuneId) {
-                                option.selected = false;
+                    // Se è un agente esistente, rimuoviamo il comune anche dal database
+                    if (selectedAgentId && selectedAgentId !== 'new') {
+                        // Rimuovi dal database con chiamata asincrona
+                        const formData = new FormData();
+                        formData.append('agent_id', selectedAgentId);
+                        formData.append('comune_id', comuneId);
+                        
+                        // Aggiungiamo un timestamp per evitare il caching
+                        const removeTimestamp = new Date().getTime();
+                        fetch('{{ url_for("remove_comune") }}?_=' + removeTimestamp, {
+                            method: 'POST',
+                            headers: {
+                                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                'Pragma': 'no-cache',
+                                'Expires': '0'
+                            },
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast('Comune rimosso con successo', 'success');
+                                
+                                // Rimuovi dalla UI solo dopo successo operazione DB
+                                selectedComuniMap.delete(comuneId);
+                                updateSelectedComuniDisplay();
+                                
+                                // Update selection in the select element if visible
+                                if (!comuniSelect.disabled) {
+                                    Array.from(comuniSelect.options).forEach(option => {
+                                        if (option.value === comuneId) {
+                                            option.selected = false;
+                                            // Rimuovi l'attributo "già assegnato" dall'opzione
+                                            option.classList.remove('assigned-comune');
+                                            option.textContent = option.textContent.replace(' (Già assegnato)', '');
+                                        }
+                                    });
+                                }
+                            } else {
+                                showToast('Errore durante la rimozione: ' + (data.error || 'Errore sconosciuto'), 'danger');
                             }
+                        })
+                        .catch(error => {
+                            console.error('Errore nella rimozione del comune:', error);
+                            showToast('Errore di connessione al server', 'danger');
                         });
+                    } else {
+                        // Comportamento normale per agenti nuovi (solo UI)
+                        selectedComuniMap.delete(comuneId);
+                        updateSelectedComuniDisplay();
+                        
+                        // Update selection in the select element if visible
+                        if (!comuniSelect.disabled) {
+                            Array.from(comuniSelect.options).forEach(option => {
+                                if (option.value === comuneId) {
+                                    option.selected = false;
+                                }
+                            });
+                        }
                     }
                 });
             });
