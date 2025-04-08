@@ -51,7 +51,7 @@ with app.app_context():
 @app.route('/')
 def index():
     """Home page with complete map visualization of all territories"""
-    return redirect(url_for('mappa_completa'))
+    return redirect(url_for('list_agents'))
 
 @app.route('/assegnazione')
 def assegnazione():
@@ -657,6 +657,36 @@ def update_agent_contacts(agent_id):
         db.session.rollback()
         logger.error(f"Error in update_agent_contacts: {str(e)}")
         flash(f'Errore durante l\'aggiornamento: {str(e)}', 'danger')
+        return redirect(url_for('list_agents'))
+        
+@app.route('/update_agent_color/<int:agent_id>', methods=['POST'])
+def update_agent_color(agent_id):
+    """Update agent color"""
+    try:
+        agent = models.Agent.query.get(agent_id)
+        if not agent:
+            flash('Agente non trovato', 'danger')
+            return redirect(url_for('list_agents'))
+        
+        # Recupera il colore dal form
+        agent_color = request.form.get('agent_color', '#ff9800')  # Default arancione
+        
+        # Aggiorna il colore dell'agente
+        agent.color = agent_color
+        
+        # Salva le modifiche
+        db.session.commit()
+        
+        # Invalida la cache per assicurarsi che i dati siano aggiornati
+        db.session.expire_all()
+        db.session.close()
+        
+        flash(f'Colore per {agent.name} aggiornato con successo', 'success')
+        return redirect(url_for('list_agents'))
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error in update_agent_color: {str(e)}")
+        flash(f'Errore durante l\'aggiornamento del colore: {str(e)}', 'danger')
         return redirect(url_for('list_agents'))
 
 @app.errorhandler(404)

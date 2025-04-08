@@ -119,4 +119,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Add color picker preview functionality
+    document.querySelectorAll('input[type="color"]').forEach(colorInput => {
+        colorInput.addEventListener('input', function() {
+            // Find the preview element that's next to this input
+            const previewEl = this.parentElement.querySelector('.color-preview');
+            if (previewEl) {
+                previewEl.style.backgroundColor = this.value;
+            }
+        });
+    });
 });
