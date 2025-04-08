@@ -77,8 +77,8 @@
 {% endblock %}
 
 {% block scripts %}
-<!-- Google Maps JavaScript API with a placeholder for the API key -->
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" 
+<!-- Google Maps JavaScript API with the actual API key -->
+<script src="https://maps.googleapis.com/maps/api/js?key={{ google_maps_api_key }}&callback=initMap" 
         async defer></script>
 
 <script>

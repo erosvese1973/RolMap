@@ -231,10 +231,14 @@ def visualizza_mappa():
                 'region': comune_row.iloc[0]['regione']
             })
     
+    # Get Google Maps API key from environment
+    google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
+    
     return render_template('mappa.html', 
                           agent_name=agent_name, 
                           comuni=comuni_details,
-                          comune_ids=comune_ids)
+                          comune_ids=comune_ids,
+                          google_maps_api_key=google_maps_api_key)
 
 @app.route('/get_geojson', methods=['POST'])
 def get_geojson():
