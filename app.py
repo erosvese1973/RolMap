@@ -111,10 +111,15 @@ def submit():
         existing_agent = models.Agent.query.filter_by(name=agent_name).first()
         
         # First, process all inputs to validate them BEFORE any database changes
-        valid_comune_ids = []
+        # Use a set to ensure no duplicate comune_ids
+        valid_comune_ids = set()
         invalid_comuni = []
         
         for comune_id in comune_ids:
+            # Skip if already processed
+            if comune_id in valid_comune_ids:
+                continue
+                
             # Check if the comune is valid
             comune_data = comuni_data[comuni_data['codice'] == comune_id]
             if comune_data.empty:
@@ -125,7 +130,7 @@ def submit():
             
             if existing_agent and existing_assignment and existing_assignment.agent_id == existing_agent.id:
                 # Already assigned to this agent - keep it
-                valid_comune_ids.append(comune_id) 
+                valid_comune_ids.add(comune_id) 
             elif existing_assignment:
                 # Assigned to another agent - not valid
                 comune_name = comune_data.iloc[0]['comune']
@@ -134,7 +139,10 @@ def submit():
                 invalid_comuni.append(f'{comune_name} (già assegnato a {other_agent_name})')
             else:
                 # Not assigned to anyone - valid
-                valid_comune_ids.append(comune_id)
+                valid_comune_ids.add(comune_id)
+                
+        # Convert set back to list for further processing
+        valid_comune_ids = list(valid_comune_ids)
                 
         # If there are invalid comuni, alert the user but don't stop the process for valid ones
         if invalid_comuni:
