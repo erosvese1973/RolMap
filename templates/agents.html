@@ -40,7 +40,12 @@
                         <tbody>
                             {% for agent in agents %}
                             <tr>
-                                <td>{{ agent.name }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div style="width: 20px; height: 20px; background-color: {{ agent.color }}; border-radius: 50%; margin-right: 10px; border: 1px solid #333;"></div>
+                                        {{ agent.name }}
+                                    </div>
+                                </td>
                                 <td>{{ agent.registration_date.strftime('%d/%m/%Y %H:%M') }}</td>
                                 <td>
                                     <span class="badge bg-primary">{{ agent.comuni|length }}</span>

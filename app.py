@@ -101,6 +101,7 @@ def submit():
     """Process form submission for agent and selected municipalities"""
     try:
         agent_name = request.form.get('agent_name')
+        agent_color = request.form.get('agent_color', '#ff9800')  # Default to orange if not provided
         comune_ids = request.form.getlist('comuni')
         
         if not agent_name or not comune_ids:
@@ -155,8 +156,9 @@ def submit():
                 return redirect(url_for('index'))
         
         if existing_agent:
-            # Update existing agent's municipalities
+            # Update existing agent's municipalities and color
             existing_agent.registration_date = datetime.now()
+            existing_agent.color = agent_color  # Update color
             
             # Get existing comune assignments for this agent
             existing_comuni_ids = [assignment.comune_id for assignment in existing_agent.assignments]
@@ -178,10 +180,11 @@ def submit():
             db.session.commit()
             flash(f'Aggiornate le assegnazioni per l\'agente {agent_name}', 'success')
         else:
-            # Create new agent
+            # Create new agent with color
             new_agent = models.Agent(
                 name=agent_name,
-                registration_date=datetime.now()
+                registration_date=datetime.now(),
+                color=agent_color
             )
             db.session.add(new_agent)
             db.session.flush()  # Get the ID of the new agent
@@ -231,11 +234,16 @@ def visualizza_mappa():
                 'region': comune_row.iloc[0]['regione']
             })
     
+    # Get agent details including color
+    agent = models.Agent.query.filter_by(name=agent_name).first()
+    agent_color = agent.color if agent else '#ff9800'  # Default orange if not found
+    
     # Get Google Maps API key from environment
     google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
     
     return render_template('mappa.html', 
                           agent_name=agent_name, 
+                          agent_color=agent_color,
                           comuni=comuni_details,
                           comune_ids=comune_ids,
                           google_maps_api_key=google_maps_api_key)
@@ -335,7 +343,20 @@ def list_agents():
     agents = models.Agent.query.all()
     agent_data = []
     
-    for agent in agents:
+    # Colori predefiniti per gli agenti
+    default_colors = [
+        '#f44336', '#9c27b0', '#3f51b5', '#2196f3', '#00bcd4', 
+        '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b',
+        '#ffc107', '#ff9800', '#ff5722', '#795548', '#607d8b'
+    ]
+    
+    for i, agent in enumerate(agents):
+        # Assicuriamoci che ogni agente abbia un colore
+        if not agent.color:
+            # Assegniamo un colore predefinito se non ne ha uno
+            agent.color = default_colors[i % len(default_colors)]
+            db.session.commit()
+            
         assignments = models.Assignment.query.filter_by(agent_id=agent.id).all()
         comuni = []
         
@@ -353,6 +374,7 @@ def list_agents():
             'id': agent.id,
             'name': agent.name,
             'registration_date': agent.registration_date,
+            'color': agent.color,
             'comuni': comuni
         })
     

@@ -23,7 +23,8 @@
                             <select class="form-select" id="agentSelect">
                                 <option value="" selected>-- Seleziona un agente --</option>
                                 {% for agent in agents %}
-                                <option value="{{ agent.id }}" {% if edit_agent and edit_agent.id == agent.id %}selected{% endif %}>
+                                <option value="{{ agent.id }}" {% if edit_agent and edit_agent.id == agent.id %}selected{% endif %}
+                                        data-color="{{ agent.color }}">
                                     {{ agent.name }}
                                 </option>
                                 {% endfor %}
@@ -36,6 +37,15 @@
                             <input type="text" class="form-control" id="agent_name" name="agent_name" 
                                    {% if edit_agent %}value="{{ edit_agent.name }}"{% endif %} required>
                             <div class="form-text">Nome dell'agente da creare o modificare</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="agent_color" class="form-label">Colore Agente</label>
+                            <input type="color" class="form-control form-control-color" id="agent_color" name="agent_color" 
+                                   {% if edit_agent %}value="{{ edit_agent.color }}"{% else %}value="#ff9800"{% endif %}>
+                            <div class="form-text">Colore per identificare i territori dell'agente sulla mappa</div>
                         </div>
                     </div>
 
@@ -112,6 +122,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     const agentSelect = document.getElementById('agentSelect');
     const agentNameInput = document.getElementById('agent_name');
+    const agentColorInput = document.getElementById('agent_color');
     const regionSelect = document.getElementById('region');
     const provinceSelect = document.getElementById('province');
     const comuniSelect = document.getElementById('comuni');
@@ -132,6 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Create new agent
             agentNameInput.value = '';
             agentNameInput.readOnly = false;
+            agentColorInput.value = '#ff9800'; // Default color for new agents
             
             // Clear selected comuni
             selectedComuniMap.clear();
@@ -141,6 +153,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedOption = this.options[this.selectedIndex];
             agentNameInput.value = selectedOption.textContent.trim();
             agentNameInput.readOnly = true;
+            
+            // Set the color from the data attribute
+            const agentColor = selectedOption.getAttribute('data-color');
+            agentColorInput.value = agentColor || '#ff9800';
             
             // Fetch agent's assigned comuni
             fetch('{{ url_for("get_agent_comuni") }}', {
@@ -176,6 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // No agent selected
             agentNameInput.value = '';
             agentNameInput.readOnly = false;
+            agentColorInput.value = '#ff9800'; // Reset to default color
             
             // Clear selected comuni
             selectedComuniMap.clear();

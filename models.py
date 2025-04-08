@@ -6,6 +6,7 @@ class Agent(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     registration_date = db.Column(db.DateTime, default=datetime.now)
+    color = db.Column(db.String(20), default='#ff9800')  # Colore predefinito arancione
     assignments = db.relationship('Assignment', backref='agent', lazy=True, cascade="all, delete-orphan")
     
     def __repr__(self):
