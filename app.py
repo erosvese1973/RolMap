@@ -50,7 +50,12 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    """Main page with the agent registration and municipality selection form"""
+    """Home page with complete map visualization of all territories"""
+    return redirect(url_for('mappa_completa'))
+
+@app.route('/assegnazione')
+def assegnazione():
+    """Page with the agent registration and municipality selection form"""
     # Force refresh of database tables to ensure we have the latest data
     db.session.expire_all()
     db.session.close()
@@ -151,13 +156,13 @@ def submit():
         # In questo caso, non dobbiamo richiedere comuni se abbiamo l'ID di un agente esistente
         if not agent_name:
             flash('Nome agente obbligatorio', 'danger')
-            return redirect(url_for('index'))
+            return redirect(url_for('assegnazione'))
         
         # Se non abbiamo comuni e non abbiamo un ID agente, è un errore
         # Ma se abbiamo un ID agente, stiamo cancellando tutti i comuni dell'agente
         if not comune_ids and not agent_id:
             flash('Seleziona almeno un comune', 'danger')
-            return redirect(url_for('index'))
+            return redirect(url_for('assegnazione'))
         
         # Check if agent already exists
         existing_agent = models.Agent.query.filter_by(name=agent_name).first()
@@ -206,7 +211,7 @@ def submit():
             # If no valid comuni are left, stop the process
             if not valid_comune_ids:
                 flash('Nessun comune valido da assegnare', 'danger')
-                return redirect(url_for('index'))
+                return redirect(url_for('assegnazione'))
         
         if existing_agent:
             # Update existing agent's municipalities and color
@@ -279,7 +284,7 @@ def submit():
         db.session.rollback()
         logger.error(f"Error in submit: {str(e)}")
         flash(f'Errore durante il salvataggio: {str(e)}', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('assegnazione'))
 
 @app.route('/visualizza_mappa')
 def visualizza_mappa():
@@ -289,7 +294,7 @@ def visualizza_mappa():
     
     if not agent_name:
         flash('Seleziona prima un agente', 'warning')
-        return redirect(url_for('index'))
+        return redirect(url_for('assegnazione'))
     
     # Get comune details for display, removing duplicates
     comuni_details = []
