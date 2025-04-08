@@ -158,11 +158,15 @@ document.addEventListener('DOMContentLoaded', function() {
             const agentColor = selectedOption.getAttribute('data-color');
             agentColorInput.value = agentColor || '#ff9800';
             
-            // Fetch agent's assigned comuni
-            fetch('{{ url_for("get_agent_comuni") }}', {
+            // Fetch agent's assigned comuni - aggiungiamo un timestamp per evitare la cache
+            const agentTimestamp = new Date().getTime();
+            fetch('{{ url_for("get_agent_comuni") }}?_=' + agentTimestamp, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
                 },
                 body: 'agent_id=' + encodeURIComponent(selectedValue)
             })
@@ -212,11 +216,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Fetch provinces for selected region
-        fetch('{{ url_for("get_provinces") }}', {
+        // Fetch provinces for selected region - aggiungiamo un timestamp per evitare la cache
+        const provinceTimestamp = new Date().getTime();
+        fetch('{{ url_for("get_provinces") }}?_=' + provinceTimestamp, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             },
             body: 'region=' + encodeURIComponent(this.value)
         })
@@ -247,11 +255,15 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Fetch comuni for selected province
-        fetch('{{ url_for("get_comuni") }}', {
+        // Fetch comuni for selected province - aggiungiamo un timestamp per evitare la cache
+        const timestamp = new Date().getTime();
+        fetch('{{ url_for("get_comuni") }}?_=' + timestamp, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             },
             body: 'province=' + encodeURIComponent(this.value)
         })
@@ -264,6 +276,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 option.textContent = comune.comune;
                 
                 // If already assigned to another agent, disable and mark with a warning
+                // Aggiungiamo un controllo di freschezza sui dati per evitare che i comuni liberati
+                // rimangano marcati come "Già assegnato" dopo l'eliminazione di un agente
                 if (comune.assigned && !selectedComuniMap.has(comune.codice)) {
                     option.disabled = true;
                     option.className = 'text-warning';

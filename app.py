@@ -1,5 +1,6 @@
 import os
 import logging
+import time
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
@@ -49,6 +50,13 @@ with app.app_context():
 @app.route('/')
 def index():
     """Main page with the agent registration and municipality selection form"""
+    # Force refresh of database tables to ensure we have the latest data
+    db.session.expire_all()
+    db.session.close()
+    
+    # Generate a timestamp to force cache invalidation on client side
+    import_time = int(time.time())
+    
     regions = sorted(comuni_data['regione'].unique())
     agents = models.Agent.query.all()
     
@@ -58,7 +66,7 @@ def index():
     if edit_agent_id:
         edit_agent = models.Agent.query.get(edit_agent_id)
     
-    return render_template('index.html', regions=regions, agents=agents, edit_agent=edit_agent)
+    return render_template('index.html', regions=regions, agents=agents, edit_agent=edit_agent, import_time=import_time)
 
 @app.route('/get_provinces', methods=['POST'])
 def get_provinces():
@@ -342,6 +350,13 @@ def get_geojson():
 @app.route('/agents')
 def list_agents():
     """List all registered agents and their assigned municipalities"""
+    # Force refresh of database tables to ensure we have the latest data
+    db.session.expire_all()
+    db.session.close()
+    
+    # Generate a timestamp to force cache invalidation on client side
+    import_time = int(time.time())
+    
     agents = models.Agent.query.all()
     agent_data = []
     
@@ -380,7 +395,7 @@ def list_agents():
             'comuni': comuni
         })
     
-    return render_template('agents.html', agents=agent_data)
+    return render_template('agents.html', agents=agent_data, import_time=import_time)
 
 @app.route('/get_agent_comuni', methods=['POST'])
 def get_agent_comuni():
