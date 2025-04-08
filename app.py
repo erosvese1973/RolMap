@@ -137,6 +137,8 @@ def submit():
                 continue
                 
             # Check if comune is already assigned to another agent
+            # Force a fresh query to ensure we're working with the latest data
+            db.session.expire_all()
             existing_assignment = models.Assignment.query.filter_by(comune_id=comune_id).first()
             
             if existing_agent and existing_assignment and existing_assignment.agent_id == existing_agent.id:
@@ -171,16 +173,21 @@ def submit():
             existing_agent.color = agent_color  # Update color
             
             # Get existing comune assignments for this agent
-            existing_comuni_ids = [assignment.comune_id for assignment in existing_agent.assignments]
+            # Ensure we're using fresh data
+            db.session.expire_all()
+            existing_assignments = models.Assignment.query.filter_by(agent_id=existing_agent.id).all()
+            existing_comuni_ids = [assignment.comune_id for assignment in existing_assignments]
             
             # Remove assignments that are no longer selected
-            for assignment in list(existing_agent.assignments):
+            for assignment in existing_assignments:
                 if assignment.comune_id not in valid_comune_ids:
+                    logger.debug(f"Removing comune {assignment.comune_id} from agent {existing_agent.id}")
                     db.session.delete(assignment)
             
             # Add new comune assignments
             for comune_id in valid_comune_ids:
                 if comune_id not in existing_comuni_ids:
+                    logger.debug(f"Adding comune {comune_id} to agent {existing_agent.id}")
                     new_assignment = models.Assignment(
                         agent_id=existing_agent.id,
                         comune_id=comune_id
@@ -188,6 +195,11 @@ def submit():
                     db.session.add(new_assignment)
             
             db.session.commit()
+            
+            # Ensure the cache is cleared after commit
+            db.session.expire_all()
+            db.session.close()
+            
             flash(f'Aggiornate le assegnazioni per l\'agente {agent_name}', 'success')
         else:
             # Create new agent with color
@@ -201,6 +213,7 @@ def submit():
             
             # Add comune assignments
             for comune_id in valid_comune_ids:
+                logger.debug(f"Adding comune {comune_id} to new agent {new_agent.id}")
                 new_assignment = models.Assignment(
                     agent_id=new_agent.id,
                     comune_id=comune_id
@@ -208,6 +221,11 @@ def submit():
                 db.session.add(new_assignment)
             
             db.session.commit()
+            
+            # Ensure the cache is cleared after commit
+            db.session.expire_all()
+            db.session.close()
+            
             flash(f'Nuovo agente {agent_name} registrato con successo', 'success')
         
         # Store in session for map display
@@ -404,12 +422,17 @@ def get_agent_comuni():
     if not agent_id:
         return jsonify([])
     
+    # Force database refresh to ensure we're working with the latest data
+    db.session.expire_all()
+    
     agent = models.Agent.query.get(agent_id)
     if not agent:
         return jsonify([])
     
-    # Get agent's assigned comuni
+    # Get agent's assigned comuni with a fresh query
     assignments = models.Assignment.query.filter_by(agent_id=agent.id).all()
+    logger.debug(f"Found {len(assignments)} assignments for agent {agent_id}")
+    
     comuni_list = []
     
     for assignment in assignments:
@@ -421,6 +444,9 @@ def get_agent_comuni():
                 'province': comune_row.iloc[0]['provincia'],
                 'region': comune_row.iloc[0]['regione']
             })
+    
+    # Close the session to prevent stale data
+    db.session.close()
     
     return jsonify(comuni_list)
 
