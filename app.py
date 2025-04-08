@@ -55,7 +55,7 @@ def index():
 
 @app.route('/assegnazione')
 def assegnazione():
-    """Page with the agent registration and municipality selection form"""
+    """Page with the municipality selection form for an agent"""
     # Force refresh of database tables to ensure we have the latest data
     db.session.expire_all()
     db.session.close()
@@ -64,15 +64,20 @@ def assegnazione():
     import_time = int(time.time())
     
     regions = sorted(comuni_data['regione'].unique())
-    agents = models.Agent.query.all()
     
-    # Get agent_id from query parameter if provided
+    # Get agent_id from query parameter if provided - ora è obbligatorio
     edit_agent_id = request.args.get('edit', type=int)
     edit_agent = None
+    
     if edit_agent_id:
         edit_agent = models.Agent.query.get(edit_agent_id)
-    
-    return render_template('index.html', regions=regions, agents=agents, edit_agent=edit_agent, import_time=import_time)
+        # Carichiamo anche gli agenti per mantenere compatibilità con altri funzioni JS
+        agents = models.Agent.query.all()
+        return render_template('index.html', regions=regions, agents=agents, edit_agent=edit_agent, import_time=import_time)
+    else:
+        # Se non abbiamo un agente preselezionato, reindiriziamo alla lista agenti
+        flash('Seleziona un agente dalla lista prima di assegnare i comuni', 'info')
+        return redirect(url_for('list_agents'))
 
 @app.route('/get_provinces', methods=['POST'])
 def get_provinces():

@@ -19,46 +19,21 @@
             </div>
             <div class="card-body">
                 <form id="selectionForm" action="{{ url_for('submit') }}" method="post">
-                    <!-- Selezione o Creazione Agente -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <label for="agentSelect" class="form-label">Seleziona Agente Esistente</label>
-                            <select class="form-select" id="agentSelect">
-                                <option value="" selected>-- Seleziona un agente --</option>
-                                {% for agent in agents %}
-                                <option value="{{ agent.id }}" {% if edit_agent and edit_agent.id == agent.id %}selected{% endif %}
-                                        data-color="{{ agent.color }}"
-                                        data-phone="{{ agent.phone or '' }}"
-                                        data-email="{{ agent.email or '' }}">
-                                    {{ agent.name }}
-                                </option>
-                                {% endfor %}
-                                <option value="new">+ Crea nuovo agente</option>
-                            </select>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <label for="agent_name" class="form-label">Nome Agente</label>
-                            <input type="text" class="form-control" id="agent_name" name="agent_name" 
-                                   {% if edit_agent %}value="{{ edit_agent.name }}"{% endif %} required>
-                            <div class="form-text">Nome dell'agente da creare o modificare</div>
-                        </div>
+                    <!-- Informazioni Agente (nascoste) -->
+                    {% if edit_agent %}
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-user-tie me-2"></i>
+                        <strong>Agente:</strong> {{ edit_agent.name }}
+                        <div class="badge ms-2" style="background-color: {{ edit_agent.color }};">Colore territorio</div>
                     </div>
+                    {% endif %}
                     
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <label for="agent_color" class="form-label">Colore Agente</label>
-                            <input type="color" class="form-control form-control-color" id="agent_color" name="agent_color" 
-                                   {% if edit_agent %}value="{{ edit_agent.color }}"{% else %}value="#ff9800"{% endif %}>
-                            <div class="form-text">Colore per identificare i territori dell'agente sulla mappa</div>
-                        </div>
-                        
-                        <!-- Campi nascosti per i contatti -->
-                        <input type="hidden" id="agent_phone" name="agent_phone" 
-                              {% if edit_agent and edit_agent.phone %}value="{{ edit_agent.phone }}"{% endif %}>
-                        <input type="hidden" id="agent_email" name="agent_email" 
-                              {% if edit_agent and edit_agent.email %}value="{{ edit_agent.email }}"{% endif %}>
-                    </div>
+                    <!-- Campi nascosti per agente -->
+                    <input type="hidden" id="agentSelect" value="{{ edit_agent.id if edit_agent else '' }}">
+                    <input type="hidden" id="agent_name" name="agent_name" value="{{ edit_agent.name if edit_agent else '' }}" required>
+                    <input type="hidden" id="agent_color" name="agent_color" value="{{ edit_agent.color if edit_agent else '#ff9800' }}">
+                    <input type="hidden" id="agent_phone" name="agent_phone" value="{{ edit_agent.phone if edit_agent and edit_agent.phone else '' }}">
+                    <input type="hidden" id="agent_email" name="agent_email" value="{{ edit_agent.email if edit_agent and edit_agent.email else '' }}">
 
                     <div class="row mb-4">
                         <!-- Regione -->
@@ -446,9 +421,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clear current display
         selectedComuniContainer.innerHTML = '';
         
-        // Il bottone "Visualizza Mappa" è sempre abilitato se abbiamo un agente selezionato
-        const isAgentSelected = agentSelect.value && agentSelect.value !== '';
-        submitBtn.disabled = !isAgentSelected;
+        // In questa nuova versione, l'agente è sempre preselezionato
+        submitBtn.disabled = false;
         
         if (selectedComuniMap.size === 0) {
             noComuniMessage.style.display = 'block';
