@@ -1,0 +1,60 @@
+     
+[2025-04-09 07:45:26 +0000] [1] [INFO] Starting gunicorn 23.0.0
+
+[2025-04-09 07:45:26 +0000] [1] [INFO] Listening at: http://0.0.0.0:5550 (1)
+
+[2025-04-09 07:45:26 +0000] [1] [INFO] Using worker: sync
+
+[2025-04-09 07:45:26 +0000] [7] [INFO] Booting worker with pid: 7
+
+[2025-04-09 07:45:26 +0000] [8] [INFO] Booting worker with pid: 8
+
+[2025-04-09 07:45:27 +0000] [9] [INFO] Booting worker with pid: 9
+
+[2025-04-09 07:45:27 +0000] [10] [INFO] Booting worker with pid: 10
+
+INFO:data_utils:Loading comuni data from static/data/elenco_comuni_istat.csv
+
+INFO:data_utils:Loading comuni data from static/data/elenco_comuni_istat.csv
+
+INFO:data_utils:Loading comuni data from static/data/elenco_comuni_istat.csv
+
+INFO:data_utils:Loaded 7896 municipalities from CSV
+
+INFO:data_utils:Loaded 7896 municipalities from CSV
+
+INFO:data_utils:Loaded 7896 municipalities from CSV
+
+INFO:data_utils:Loading comuni data from static/data/elenco_comuni_istat.csv
+
+INFO:data_utils:Loaded 7896 municipalities from CSV
+
+[2025-04-09 07:51:18 +0000] [1] [INFO] Starting gunicorn 23.0.0
+
+[2025-04-09 07:51:18 +0000] [1] [INFO] Listening at: http://0.0.0.0:5550 (1)
+
+[2025-04-09 07:51:18 +0000] [1] [INFO] Using worker: sync
+
+[2025-04-09 07:51:18 +0000] [7] [INFO] Booting worker with pid: 7
+
+[2025-04-09 07:51:18 +0000] [8] [INFO] Booting worker with pid: 8
+
+[2025-04-09 07:51:18 +0000] [9] [INFO] Booting worker with pid: 9
+
+[2025-04-09 07:51:18 +0000] [10] [INFO] Booting worker with pid: 10
+
+INFO:data_utils:Loading comuni data from static/data/elenco_comuni_istat.csv
+
+INFO:data_utils:Loading comuni data from static/data/elenco_comuni_istat.csv
+
+INFO:data_utils:Loading comuni data from static/data/elenco_comuni_istat.csv
+
+INFO:data_utils:Loading comuni data from static/data/elenco_comuni_istat.csv
+
+INFO:data_utils:Loaded 7896 municipalities from CSV
+
+INFO:data_utils:Loaded 7896 municipalities from CSV
+
+INFO:data_utils:Loaded 7896 municipalities from CSV
+
+INFO:data_utils:Loaded 7896 municipalities from CSV
