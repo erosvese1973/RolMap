@@ -105,7 +105,7 @@ server {
     server_name example.com www.example.com;
 
     location / {
-        proxy_pass http://localhost:5000;
+        proxy_pass http://localhost:5550;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;

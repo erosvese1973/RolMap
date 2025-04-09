@@ -29,7 +29,7 @@ ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
 # Porta esposta
-EXPOSE 5000
+EXPOSE 5550
 
 # Avvia l'applicazione con Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--timeout", "120", "main:app"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5550", "--workers", "4", "--timeout", "120", "main:app"]

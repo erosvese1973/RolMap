@@ -5,7 +5,7 @@ services:
     build: .
     restart: always
     ports:
-      - "5000:5000"
+      - "5550:5550"
     volumes:
       - ./instance:/app/instance
       - ./static/data:/app/static/data
