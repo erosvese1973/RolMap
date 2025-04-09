@@ -34,7 +34,6 @@ docker-compose.yml
 README.md
 README-deploy.md
 dependencies.txt
-deploy_requirements.txt
 
 # Other unnecessary files
 *.md
