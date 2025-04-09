@@ -4,20 +4,13 @@ import time
 from datetime import datetime
 from collections import OrderedDict
 from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
+from database import db
+from models import Agent, Assignment
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-# Create DeclarativeBase class
-class Base(DeclarativeBase):
-    pass
-
-# Initialize SQLAlchemy
-db = SQLAlchemy(model_class=Base)
 
 # Create Flask app
 app = Flask(__name__)
@@ -40,7 +33,6 @@ db.init_app(app)
 # Import data utilities after app is created to avoid circular imports
 from data_utils import load_comuni_data
 from geo_utils import get_geojson_from_wfs
-import models
 
 # Initialize database
 with app.app_context():
@@ -75,9 +67,9 @@ def assegnazione():
     edit_agent = None
     
     if agent_id:
-        edit_agent = models.Agent.query.get(agent_id)
+        edit_agent = Agent.query.get(agent_id)
         # Carichiamo anche gli agenti per mantenere compatibilità con altri funzioni JS
-        agents = models.Agent.query.all()
+        agents = Agent.query.all()
         return render_template('index.html', regions=regions, agents=agents, edit_agent=edit_agent, import_time=import_time)
     else:
         # Se non abbiamo un agente preselezionato, reindiriziamo alla lista agenti
@@ -109,7 +101,7 @@ def get_comuni():
     try:
         # Execute a fresh query to ensure we have the latest data
         db.session.expire_all()  # Expire cached objects to force a fresh load
-        assigned_comuni = [a.comune_id for a in models.Assignment.query.all()]
+        assigned_comuni = [a.comune_id for a in Assignment.query.all()]
     except Exception as e:
         logger.error(f"Error getting assigned comuni: {str(e)}")
     
@@ -133,7 +125,7 @@ def remove_comune():
             return jsonify({'success': False, 'error': 'Dati mancanti'}), 400
         
         # Elimina l'assegnazione se esiste
-        assignment = models.Assignment.query.filter_by(
+        assignment = Assignment.query.filter_by(
             agent_id=agent_id, 
             comune_id=comune_id
         ).first()
@@ -177,7 +169,7 @@ def submit():
             return redirect(url_for('assegnazione'))
         
         # Check if agent already exists
-        existing_agent = models.Agent.query.filter_by(name=agent_name).first()
+        existing_agent = Agent.query.filter_by(name=agent_name).first()
         
         # First, process all inputs to validate them BEFORE any database changes
         # Use a set to ensure no duplicate comune_ids
@@ -197,7 +189,7 @@ def submit():
             # Check if comune is already assigned to another agent
             # Force a fresh query to ensure we're working with the latest data
             db.session.expire_all()
-            existing_assignment = models.Assignment.query.filter_by(comune_id=comune_id).first()
+            existing_assignment = Assignment.query.filter_by(comune_id=comune_id).first()
             
             if existing_agent and existing_assignment and existing_assignment.agent_id == existing_agent.id:
                 # Already assigned to this agent - keep it
@@ -205,7 +197,7 @@ def submit():
             elif existing_assignment:
                 # Assigned to another agent - not valid
                 comune_name = comune_data.iloc[0]['comune']
-                other_agent = models.Agent.query.get(existing_assignment.agent_id)
+                other_agent = Agent.query.get(existing_assignment.agent_id)
                 other_agent_name = other_agent.name if other_agent else "un altro agente"
                 invalid_comuni.append(f'{comune_name} (già assegnato a {other_agent_name})')
             else:
@@ -235,7 +227,7 @@ def submit():
             # Get existing comune assignments for this agent
             # Ensure we're using fresh data
             db.session.expire_all()
-            existing_assignments = models.Assignment.query.filter_by(agent_id=existing_agent.id).all()
+            existing_assignments = Assignment.query.filter_by(agent_id=existing_agent.id).all()
             existing_comuni_ids = [assignment.comune_id for assignment in existing_assignments]
             
             # Remove assignments that are no longer selected
@@ -248,7 +240,7 @@ def submit():
             for comune_id in valid_comune_ids:
                 if comune_id not in existing_comuni_ids:
                     logger.debug(f"Adding comune {comune_id} to agent {existing_agent.id}")
-                    new_assignment = models.Assignment(
+                    new_assignment = Assignment(
                         agent_id=existing_agent.id,
                         comune_id=comune_id
                     )
@@ -263,7 +255,7 @@ def submit():
             flash(f'Aggiornate le assegnazioni per l\'agente {agent_name}', 'success')
         else:
             # Create new agent with color
-            new_agent = models.Agent(
+            new_agent = Agent(
                 name=agent_name,
                 phone=agent_phone,
                 email=agent_email,
@@ -276,7 +268,7 @@ def submit():
             # Add comune assignments
             for comune_id in valid_comune_ids:
                 logger.debug(f"Adding comune {comune_id} to new agent {new_agent.id}")
-                new_assignment = models.Assignment(
+                new_assignment = Assignment(
                     agent_id=new_agent.id,
                     comune_id=comune_id
                 )
@@ -332,7 +324,7 @@ def visualizza_mappa():
             return redirect(url_for('assegnazione'))
         
         # Verifica se esiste un agente con il nome specificato
-        agent = models.Agent.query.filter_by(name=agent_name).first()
+        agent = Agent.query.filter_by(name=agent_name).first()
         agent_color = agent.color if agent else '#ff9800'  # Default orange
     
     # Get comune details for display, removing duplicates
@@ -359,7 +351,7 @@ def visualizza_mappa():
     if request.method == 'POST':
         # Cerca l'agente nel database solo se ha un ID valido
         if agent_id and agent_id != 'new':
-            existing_agent = models.Agent.query.get(agent_id)
+            existing_agent = Agent.query.get(agent_id)
             if existing_agent:
                 agent_color = existing_agent.color
                 agent_id = existing_agent.id  # Assicuriamoci di avere l'ID corretto
@@ -368,7 +360,7 @@ def visualizza_mappa():
             agent_id = None
     else:
         # Logica per richieste GET (la stessa di prima)
-        agent = models.Agent.query.filter_by(name=agent_name).first()
+        agent = Agent.query.filter_by(name=agent_name).first()
         agent_color = agent.color if agent else '#ff9800'  # Default orange
         agent_id = agent.id if agent else None
         agent_phone = agent.phone if agent else None  # Recuperiamo il numero di telefono
@@ -492,7 +484,7 @@ def list_agents():
     import_time = int(time.time())
     
     # Ottieni tutti gli agenti
-    agents = models.Agent.query.all()
+    agents = Agent.query.all()
     
     # Ordina gli agenti per cognome (assumendo che il cognome sia l'ultima parola del nome completo)
     # Esempio: da "Mario Rossi" prende "Rossi" come chiave di ordinamento
@@ -514,7 +506,7 @@ def list_agents():
             agent.color = default_colors[i % len(default_colors)]
             db.session.commit()
             
-        assignments = models.Assignment.query.filter_by(agent_id=agent.id).all()
+        assignments = Assignment.query.filter_by(agent_id=agent.id).all()
         comuni = []
         
         for assignment in assignments:
@@ -550,7 +542,7 @@ def mappa_completa():
     google_maps_api_key = os.environ.get('GOOGLE_MAPS_API_KEY', '')
     
     # Ottieni tutti gli agenti con i loro colori e comuni assegnati
-    agents = models.Agent.query.all()
+    agents = Agent.query.all()
     agent_data = []
     
     # Mappa per tenere traccia di tutti i comuni e degli agenti associati
@@ -569,7 +561,7 @@ def mappa_completa():
         # Assicuriamoci che ogni agente abbia un colore
         agent_color = agent.color if agent.color else default_colors[i % len(default_colors)]
         
-        assignments = models.Assignment.query.filter_by(agent_id=agent.id).all()
+        assignments = Assignment.query.filter_by(agent_id=agent.id).all()
         agent_comuni = []
         
         for assignment in assignments:
@@ -631,12 +623,12 @@ def get_agent_comuni():
     # Force database refresh to ensure we're working with the latest data
     db.session.expire_all()
     
-    agent = models.Agent.query.get(agent_id)
+    agent = Agent.query.get(agent_id)
     if not agent:
         return jsonify([])
     
     # Get agent's assigned comuni with a fresh query
-    assignments = models.Assignment.query.filter_by(agent_id=agent.id).all()
+    assignments = Assignment.query.filter_by(agent_id=agent.id).all()
     logger.debug(f"Found {len(assignments)} assignments for agent {agent_id}")
     
     comuni_list = []
@@ -660,7 +652,7 @@ def get_agent_comuni():
 def delete_agent(agent_id):
     """Delete an agent and their municipality assignments"""
     try:
-        agent = models.Agent.query.get(agent_id)
+        agent = Agent.query.get(agent_id)
         if not agent:
             flash('Agente non trovato', 'danger')
             return redirect(url_for('list_agents'))
@@ -699,13 +691,13 @@ def update_agent_contacts(agent_id):
                 return redirect(url_for('list_agents'))
                 
             # Verifica se l'agente esiste già
-            existing_agent = models.Agent.query.filter_by(name=agent_name).first()
+            existing_agent = Agent.query.filter_by(name=agent_name).first()
             if existing_agent:
                 flash(f'Un agente con il nome "{agent_name}" esiste già', 'warning')
                 return redirect(url_for('list_agents'))
                 
             # Crea un nuovo agente
-            new_agent = models.Agent(
+            new_agent = Agent(
                 name=agent_name,
                 phone='',
                 email='',
@@ -721,7 +713,7 @@ def update_agent_contacts(agent_id):
         
         # Caso standard: aggiornamento agente esistente
         agent_id = int(agent_id)  # Converti a intero
-        agent = models.Agent.query.get(agent_id)
+        agent = Agent.query.get(agent_id)
         if not agent:
             flash('Agente non trovato', 'danger')
             return redirect(url_for('list_agents'))
@@ -733,7 +725,7 @@ def update_agent_contacts(agent_id):
         
         # Verifico se il nome è già utilizzato da un altro agente
         if agent_name != agent.name:
-            existing_agent = models.Agent.query.filter_by(name=agent_name).first()
+            existing_agent = Agent.query.filter_by(name=agent_name).first()
             if existing_agent and existing_agent.id != agent_id:
                 flash(f'Un agente con il nome "{agent_name}" esiste già', 'warning')
                 return redirect(url_for('list_agents'))
@@ -761,7 +753,7 @@ def update_agent_contacts(agent_id):
 def update_agent_color(agent_id):
     """Update agent color"""
     try:
-        agent = models.Agent.query.get(agent_id)
+        agent = Agent.query.get(agent_id)
         if not agent:
             flash('Agente non trovato', 'danger')
             return redirect(url_for('list_agents'))
@@ -788,7 +780,7 @@ def update_agent_color(agent_id):
 def update_agent_field(agent_id):
     """API per aggiornare un singolo campo di un agente senza ricaricare la pagina"""
     try:
-        agent = models.Agent.query.get(agent_id)
+        agent = Agent.query.get(agent_id)
         if not agent:
             return jsonify({'success': False, 'error': 'Agente non trovato'}), 404
         
@@ -801,7 +793,7 @@ def update_agent_field(agent_id):
         if field_type == 'name':
             # Controllo che il nome non sia già utilizzato da un altro agente
             if value:
-                existing = models.Agent.query.filter_by(name=value).first()
+                existing = Agent.query.filter_by(name=value).first()
                 if existing and existing.id != agent_id:
                     return jsonify({'success': False, 'error': 'Nome già in uso da un altro agente'}), 400
                 agent.name = value
@@ -850,3 +842,6 @@ def page_not_found(e):
 @app.errorhandler(500)
 def server_error(e):
     return render_template('500.html'), 500
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5550)

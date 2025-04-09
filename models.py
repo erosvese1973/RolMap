@@ -1,5 +1,5 @@
 from datetime import datetime
-from app import db
+from database import db
 
 class Agent(db.Model):
     """Model for sales agents"""
